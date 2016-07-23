@@ -1,4 +1,4 @@
-package com.example.egg.egg;
+package comegg_electric_unicycle.github.eggunicycle;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;
