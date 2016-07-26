@@ -59,6 +59,14 @@
     android:text="Disconnect"
     android:background="#d8dbda"
     android:layout_centerHorizontal="true"/>
+    <TextView
+        android:id= "@+id/showTrama"
+        android:layout_marginTop="30dp"
+        android:layout_marginBottom="30dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="12dp"
+        android:layout_below="@id/buttonDisconnect"/>
 
 <!--view 3: when app show all devices enable to pair-->
 <TextView

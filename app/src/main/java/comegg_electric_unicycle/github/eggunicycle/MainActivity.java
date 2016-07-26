@@ -36,6 +36,7 @@ import java.util.ArrayList;
 import java.lang.String;
 import java.util.Set;
 import java.util.UUID;
+import java.util.Vector;
 
 
 public class MainActivity extends AppCompatActivity
@@ -54,12 +55,17 @@ public class MainActivity extends AppCompatActivity
     ArrayAdapter<String> adapter;
     private ListView list;
     private Button findDevices, disconnect;
-    private TextView connectedWith, connectedWithC, devicesEnable;
+    private TextView connectedWith, connectedWithC, devicesEnable, aux;
 
     boolean stopThread;
     Thread thread;
     byte buffer[];
     int bufferPosition;
+    int state=0;
+    int speed;
+    int current;
+
+    public Vector<Byte> serialData = new Vector<Byte>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,6 +79,7 @@ public class MainActivity extends AppCompatActivity
         connectedWith=(TextView) findViewById(R.id.connectedWith);
         connectedWithC=(TextView) findViewById(R.id.connectedWithC);
         devicesEnable=(TextView) findViewById(R.id.devicesEnable);
+        aux=(TextView) findViewById(R.id.showTrama);
         findDevices = (Button) findViewById(R.id.buttonFind);
         disconnect= (Button) findViewById(R.id.buttonDisconnect);
         list = (ListView) findViewById(R.id.listDevices1);
@@ -83,6 +90,7 @@ public class MainActivity extends AppCompatActivity
         findDevices.setVisibility(View.INVISIBLE);
         disconnect.setVisibility(View.INVISIBLE);
         list.setVisibility(View.INVISIBLE);
+        aux.setVisibility(View.INVISIBLE);
 
 
         arrayList = new ArrayList<String>();
@@ -137,7 +145,7 @@ public class MainActivity extends AppCompatActivity
     }
     public void findButtonClick(){
 
-
+        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
         if (mBluetoothAdapter == null) {
             Toast.makeText(getApplicationContext(), "Device doesnt Support Bluetooth", Toast.LENGTH_SHORT).show();
@@ -247,16 +255,16 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.ic_menu_bluetooth){
-            mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-            if(checkIfisConnected())
-            {
-                connectToDevice();
-                beginListenForData();
+           // mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+            //if(checkIfisConnected())
+           // {
+               // connectToDevice();
+                //beginListenForData();
 
 
 
-            }
-            else{
+           // }
+            //else{
                 connectedWith.setVisibility(View.INVISIBLE);
                 connectedWithC.setVisibility(View.INVISIBLE);
                 devicesEnable.setVisibility(View.INVISIBLE);
@@ -264,7 +272,7 @@ public class MainActivity extends AppCompatActivity
                 disconnect.setVisibility(View.INVISIBLE);
                 list.setVisibility(View.INVISIBLE);
 
-            }
+          ////  }
 
 
 
@@ -286,7 +294,7 @@ public class MainActivity extends AppCompatActivity
         findDevices.setVisibility(View.INVISIBLE);
         disconnect.setVisibility(View.VISIBLE);
         list.setVisibility(View.INVISIBLE);
-
+        aux.setVisibility(View.VISIBLE);
 
 
         final Handler handler = new Handler();
@@ -303,17 +311,207 @@ public class MainActivity extends AppCompatActivity
                         int byteCount = inputStream.available();
                         if(byteCount > 0)
                         {
-                            byte[] rawBytes = new byte[byteCount];
+                            final byte[] rawBytes = new byte[byteCount];
+
                             inputStream.read(rawBytes);
-                            final String string=new String(rawBytes,"UTF-8");
+
+                            // store all received bytes on vector
+                            for (int i = 0; i < byteCount; ) {
+                                serialData.add(rawBytes[i]);
+                                i++;
+                            }
+
+
+                            //read rawBytes
+
+
+
+                           // final String string=new String(rawBytes,"UTF-8");
+
                             handler.post(new Runnable() {
                                 public void run()
                                 {
-                                   devicesEnable.append(string);
+                                   //aux.append(string);
+                                    //aux.append(aux;
                                 }
                             });
 
                         }
+                       
+                        while (!serialData.isEmpty())
+                        {
+
+                            Byte data = serialData.get(0);
+                            serialData.removeElementAt(0);
+                             switch (state) {
+
+                             // start by looking for the START sequence of bytes: 0x18 0x5a 0x5a 0x5a 0x5a 0x55 0xaa
+                             case 0:
+                                 if (data == 24)
+                                 {
+                                     state++;
+                                 }
+                                 else state = 0;
+                                 break;
+
+                             case 1:
+                                 if (data == 90)
+                                 {
+                                     state++;
+                                 }
+                                 else state = 0;
+                                 break;
+
+                             case 2:
+                                 if (data == 90)
+                                 {
+                                     state++;
+                                 }
+                                 else state = 0;
+                                 break;
+
+                             case 3:
+                                 if (data == 90)
+                                 {
+                                     state++;
+                                 }
+                                 else state = 0;
+                                 break;
+
+                             case 4:
+                                 if (data == 90)
+                                 {
+                                     state++;
+                                 }
+                                 else state = 0;
+                                 break;
+
+                             case 5:
+                                 if (data == 85)
+                                 {
+                                     state++;
+                                 }
+                                 else state = 0;
+                                 break;
+
+                             case 6:
+                                 if (data == -86)
+                                 {
+                                     state++;
+                                 }
+                                 else state = 0;
+                                 break;
+
+                                 // next 2 bytes are voltage
+                                 case 7:
+                                     state++;
+                                     break;
+
+                                 case 8:
+                                     state++;
+                                     break;
+
+                                 // next 2 bytes are speed
+                                 case 9:
+                                     state++;
+                                     speed = (data << 8);
+                                     break;
+
+                                 case 10:
+                                     state++;
+                                     speed |= data;
+                                     break;
+
+                                 // next 4 bytes are trip distance
+                                 case 11:
+                                     state++;
+                                     break;
+
+                                 case 12:
+                                     state++;
+                                     break;
+
+                                 case 13:
+                                     state++;
+                                     break;
+
+                                 case 14:
+                                     state++;
+                                     break;
+
+                                 // next 2 bytes are current
+                                 case 15:
+                                     state++;
+                                     current = (data << 8);
+                                     break;
+
+                                 case 16:
+                                     state++;
+                                     current |= data;
+                                     break;
+
+                                 // next 2 bytes are temperature
+                                 case 17:
+                                     state++;
+                                     break;
+
+                                 case 18:
+                                     state++;
+                                     break;
+
+                                 case 19:
+                                     if (data == 0)
+                                     {
+                                         state++;
+                                     }
+                                     else state = 0;
+                                     break;
+
+                                 case 20:
+                                     if (data == 0)
+                                     {
+                                         state++;
+                                     }
+                                     else state = 0;
+                                     break;
+
+                                 case 21:
+                                     if (data == -1)
+                                     {
+                                         state++;
+                                     }
+                                     else state = 0;
+                                     break;
+
+                                 case 22:
+                                     if (data == -8)
+                                     {
+                                         state++;
+                                     }
+                                     else state = 0;
+                                     break;
+
+                                 case 23:
+                                     if (data == 0)
+                                     {
+                                         state = 0;
+                                         //data_euc.flag = 1;
+                                     }
+                                     else state = 0;
+                                     break;
+
+                                 default:
+                                     state = 0;
+                                     break;
+                             }
+
+
+
+                           // i++;
+                        }
+
+
+
                     }
                     catch (IOException ex)
                     {
