@@ -1,7 +1,6 @@
 package comegg_electric_unicycle.github.eggunicycle;
 
 
-import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.IntentFilter;
@@ -31,12 +30,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.lang.String;
 import java.util.Set;
 import java.util.UUID;
 import java.util.Vector;
+
+import java.text.DecimalFormat;
 
 
 public class MainActivity extends AppCompatActivity
@@ -44,8 +44,7 @@ public class MainActivity extends AppCompatActivity
 
     private BluetoothDevice device;
     private BluetoothSocket socket;
-    private BluetoothSocket tmp;
-    private OutputStream outputStream;
+   // private OutputStream outputStream;
     private InputStream inputStream;
     private BluetoothAdapter mBluetoothAdapter = null;
     private static final UUID MY_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
@@ -55,15 +54,16 @@ public class MainActivity extends AppCompatActivity
     ArrayAdapter<String> adapter;
     private ListView list;
     private Button findDevices, disconnect;
-    private TextView connectedWith, connectedWithC, devicesEnable, aux;
+    private TextView connectedWith, connectedWithC, devicesEnable, speedView, voltageView, tripView, currentView, tempView;
 
     boolean stopThread;
     Thread thread;
     byte buffer[];
     int bufferPosition;
     int state=0;
-    int speed;
-    int current;
+    int speed, voltage, trip, current, temperature;
+    double speed_, current_;
+    boolean end = false;
 
     public Vector<Byte> serialData = new Vector<Byte>();
 
@@ -79,7 +79,11 @@ public class MainActivity extends AppCompatActivity
         connectedWith=(TextView) findViewById(R.id.connectedWith);
         connectedWithC=(TextView) findViewById(R.id.connectedWithC);
         devicesEnable=(TextView) findViewById(R.id.devicesEnable);
-        aux=(TextView) findViewById(R.id.showTrama);
+        speedView = (TextView) findViewById(R.id.showSpeed);
+        voltageView = (TextView) findViewById(R.id.showVoltage);
+        tripView = (TextView) findViewById(R.id.showTrip);
+        currentView = (TextView) findViewById(R.id.showCurrent);
+        tempView = (TextView) findViewById(R.id.showTemp);
         findDevices = (Button) findViewById(R.id.buttonFind);
         disconnect= (Button) findViewById(R.id.buttonDisconnect);
         list = (ListView) findViewById(R.id.listDevices1);
@@ -90,7 +94,7 @@ public class MainActivity extends AppCompatActivity
         findDevices.setVisibility(View.INVISIBLE);
         disconnect.setVisibility(View.INVISIBLE);
         list.setVisibility(View.INVISIBLE);
-        aux.setVisibility(View.INVISIBLE);
+
 
 
         arrayList = new ArrayList<String>();
@@ -184,11 +188,11 @@ public class MainActivity extends AppCompatActivity
             connected=false;
         }
         if (connected) {
-            try {
+          /*  try {
                 outputStream=socket.getOutputStream();
             } catch (IOException e) {
                 Toast.makeText(getBaseContext(), "Failed", Toast.LENGTH_LONG).show();
-            }
+            }*/
             try {
                 inputStream=socket.getInputStream();
             } catch (IOException e) {
@@ -196,57 +200,16 @@ public class MainActivity extends AppCompatActivity
             }
 
         }
-        beginListenForData();
+        if (connected) {
+            beginListenForData();
+        } else if (!connected) {
+
+
+            connectToDevice();
+        }
         return connected;
     }
-    public boolean checkIfisConnected()
-    {
-        boolean isConnected=false;
-        Set<BluetoothDevice> bondedDevices = mBluetoothAdapter.getBondedDevices();
-        if(bondedDevices.isEmpty())
-        {
-            isConnected=false;
-        }
-        else
-        {
-            for (BluetoothDevice iterator : bondedDevices)
-            {
-                    device=iterator;
-                    isConnected=true;
 
-                    break;
-
-            }
-        }
-        return isConnected;
-
-    }
-  /*  @Override
-    public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
-            drawer.closeDrawer(GravityCompat.START);
-        } else {
-            super.onBackPressed();
-        }
-    }*/
-
-
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
 
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
@@ -255,28 +218,13 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.ic_menu_bluetooth){
-           // mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-            //if(checkIfisConnected())
-           // {
-               // connectToDevice();
-                //beginListenForData();
 
-
-
-           // }
-            //else{
                 connectedWith.setVisibility(View.INVISIBLE);
                 connectedWithC.setVisibility(View.INVISIBLE);
                 devicesEnable.setVisibility(View.INVISIBLE);
                 findDevices.setVisibility(View.VISIBLE);
                 disconnect.setVisibility(View.INVISIBLE);
                 list.setVisibility(View.INVISIBLE);
-
-          ////  }
-
-
-
-
         }
 
 
@@ -294,7 +242,7 @@ public class MainActivity extends AppCompatActivity
         findDevices.setVisibility(View.INVISIBLE);
         disconnect.setVisibility(View.VISIBLE);
         list.setVisibility(View.INVISIBLE);
-        aux.setVisibility(View.VISIBLE);
+
 
 
         final Handler handler = new Handler();
@@ -311,6 +259,7 @@ public class MainActivity extends AppCompatActivity
                         int byteCount = inputStream.available();
                         if(byteCount > 0)
                         {
+                            end=false;
                             final byte[] rawBytes = new byte[byteCount];
 
                             inputStream.read(rawBytes);
@@ -320,195 +269,183 @@ public class MainActivity extends AppCompatActivity
                                 serialData.add(rawBytes[i]);
                                 i++;
                             }
-
-
-                            //read rawBytes
-
-
-
-                           // final String string=new String(rawBytes,"UTF-8");
-
-                            handler.post(new Runnable() {
-                                public void run()
-                                {
-                                   //aux.append(string);
-                                    //aux.append(aux;
-                                }
-                            });
-
                         }
                        
-                        while (!serialData.isEmpty())
+                        while  (!serialData.isEmpty())
                         {
+                           // if (!serialData.isEmpty()) {
+                                Byte data1 = serialData.get(0);
+                                int data = (int) data1;
+                                serialData.removeElementAt(0);
+                                if (data < 0) data += 256;
 
-                            Byte data = serialData.get(0);
-                            serialData.removeElementAt(0);
-                             switch (state) {
+                                switch (state) {
 
-                             // start by looking for the START sequence of bytes: 0x18 0x5a 0x5a 0x5a 0x5a 0x55 0xaa
-                             case 0:
-                                 if (data == 24)
-                                 {
-                                     state++;
-                                 }
-                                 else state = 0;
-                                 break;
+                                    // start by looking for the START sequence of bytes: 0x18 0x5a 0x5a 0x5a 0x5a 0x55 0xaa
+                                    case 0:
+                                        if (data == 24) {
+                                            state++;
+                                        } else state = 0;
+                                        break;
 
-                             case 1:
-                                 if (data == 90)
-                                 {
-                                     state++;
-                                 }
-                                 else state = 0;
-                                 break;
+                                    case 1:
+                                        if (data == 90) {
+                                            state++;
+                                        } else state = 0;
+                                        break;
 
-                             case 2:
-                                 if (data == 90)
-                                 {
-                                     state++;
-                                 }
-                                 else state = 0;
-                                 break;
+                                    case 2:
+                                        if (data == 90) {
+                                            state++;
+                                        } else state = 0;
+                                        break;
 
-                             case 3:
-                                 if (data == 90)
-                                 {
-                                     state++;
-                                 }
-                                 else state = 0;
-                                 break;
+                                    case 3:
+                                        if (data == 90) {
+                                            state++;
+                                        } else state = 0;
+                                        break;
 
-                             case 4:
-                                 if (data == 90)
-                                 {
-                                     state++;
-                                 }
-                                 else state = 0;
-                                 break;
+                                    case 4:
+                                        if (data == 90) {
+                                            state++;
+                                        } else state = 0;
+                                        break;
 
-                             case 5:
-                                 if (data == 85)
-                                 {
-                                     state++;
-                                 }
-                                 else state = 0;
-                                 break;
+                                    case 5:
+                                        if (data == 85) {
+                                            state++;
+                                        } else state = 0;
+                                        break;
 
-                             case 6:
-                                 if (data == -86)
-                                 {
-                                     state++;
-                                 }
-                                 else state = 0;
-                                 break;
+                                    case 6:
+                                        if (data == 170) {
+                                            state++;
+                                        } else state = 0;
+                                        break;
 
-                                 // next 2 bytes are voltage
-                                 case 7:
-                                     state++;
-                                     break;
+                                    // next 2 bytes are voltage
+                                    case 7:
+                                        state++;
+                                        break;
 
-                                 case 8:
-                                     state++;
-                                     break;
+                                    case 8:
+                                        state++;
+                                        break;
 
-                                 // next 2 bytes are speed
-                                 case 9:
-                                     state++;
-                                     speed = (data << 8);
-                                     break;
+                                    // next 2 bytes are speed
+                                    case 9:
+                                        state++;
+                                        speed = (data << 8);
+                                        break;
 
-                                 case 10:
-                                     state++;
-                                     speed |= data;
-                                     break;
+                                    case 10:
+                                        state++;
+                                        speed |= data;
+                                        speed_=speed*0.036;
+                                        break;
 
-                                 // next 4 bytes are trip distance
-                                 case 11:
-                                     state++;
-                                     break;
+                                    // next 4 bytes are trip distance
+                                    case 11:
+                                        state++;
+                                        break;
 
-                                 case 12:
-                                     state++;
-                                     break;
+                                    case 12:
+                                        state++;
+                                        break;
 
-                                 case 13:
-                                     state++;
-                                     break;
+                                    case 13:
+                                        state++;
+                                        break;
 
-                                 case 14:
-                                     state++;
-                                     break;
+                                    case 14:
+                                        state++;
+                                        break;
 
-                                 // next 2 bytes are current
-                                 case 15:
-                                     state++;
-                                     current = (data << 8);
-                                     break;
+                                    // next 2 bytes are current
+                                    case 15:
+                                        state++;
+                                        current = (data << 8);
+                                        break;
 
-                                 case 16:
-                                     state++;
-                                     current |= data;
-                                     break;
+                                    case 16:
+                                        state++;
+                                        current |= data;
+                                        current_ = (current / 100.000);
+                                        break;
 
-                                 // next 2 bytes are temperature
-                                 case 17:
-                                     state++;
-                                     break;
+                                    // next 2 bytes are temperature
+                                    case 17:
+                                        state++;
+                                        break;
 
-                                 case 18:
-                                     state++;
-                                     break;
+                                    case 18:
+                                        state++;
+                                        break;
 
-                                 case 19:
-                                     if (data == 0)
-                                     {
-                                         state++;
-                                     }
-                                     else state = 0;
-                                     break;
+                                    case 19:
+                                        if (data == 0) {
+                                            state++;
+                                        } else state = 0;
+                                        break;
 
-                                 case 20:
-                                     if (data == 0)
-                                     {
-                                         state++;
-                                     }
-                                     else state = 0;
-                                     break;
+                                    case 20:
+                                        if (data == 0) {
+                                            state++;
+                                        } else state = 0;
+                                        break;
 
-                                 case 21:
-                                     if (data == -1)
-                                     {
-                                         state++;
-                                     }
-                                     else state = 0;
-                                     break;
+                                    case 21:
+                                        if (data == 255) {
+                                            state++;
+                                        } else state = 0;
+                                        break;
 
-                                 case 22:
-                                     if (data == -8)
-                                     {
-                                         state++;
-                                     }
-                                     else state = 0;
-                                     break;
+                                    case 22:
+                                        if (data == 248) {
+                                            state++;
+                                        } else state = 0;
+                                        break;
 
-                                 case 23:
-                                     if (data == 0)
-                                     {
-                                         state = 0;
-                                         //data_euc.flag = 1;
-                                     }
-                                     else state = 0;
-                                     break;
+                                    case 23:
+                                        if (data == 0) {
+                                            state = 0;
+                                            runOnUiThread(new Runnable() {
 
-                                 default:
-                                     state = 0;
-                                     break;
-                             }
+                                                @Override
+                                                public void run() {
+
+                                                    speedView.setVisibility(View.VISIBLE);
+                                                    voltageView.setVisibility(View.VISIBLE);
+                                                    tripView.setVisibility(View.INVISIBLE);
+                                                    currentView.setVisibility(View.INVISIBLE);
+                                                    tempView.setVisibility(View.INVISIBLE);
 
 
 
-                           // i++;
-                        }
+
+
+                                                    /*  speedView.setText("Speed: " + String.format("%2.1f", speed_) + " km/h");
+                                                    voltageView.setText("Voltage: " + Integer.toString(voltage) + " V");
+                                                    tripView.setText("Trip distance: " + Integer.toString(trip) + " Km");
+                                                    currentView.setText("Current: " + String.format("%2.2f", current_) + " A");
+                                                    tempView.setText("Temperature: " + Integer.toString(temperature) + " ºC");*/
+
+                                                    //only to test
+                                                    speedView.setText("Speed: " + String.format("%2.1f", speed_) + " km/h");
+                                                    voltageView.setText("Current: " + String.format("%2.2f", current_) + " A");
+
+
+                                                }
+                                            });
+                                        } else state = 0;
+                                        break;
+
+                                    default:
+                                        state = 0;
+                                        break;
+                                }
+                            }
 
 
 

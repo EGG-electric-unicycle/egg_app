@@ -59,15 +59,7 @@
     android:text="Disconnect"
     android:background="#d8dbda"
     android:layout_centerHorizontal="true"/>
-    <TextView
-        android:id= "@+id/showTrama"
-        android:layout_marginTop="30dp"
-        android:layout_marginBottom="30dp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="12dp"
-        android:layout_below="@id/buttonDisconnect"/>
-
+    <TextView android:id="@+id/showSpeed" android:layout_marginTop="30dp" android:layout_marginBottom="30dp" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="12dp" android:layout_below="@id/buttonDisconnect"/><TextView android:id="@+id/showVoltage" android:layout_marginTop="30dp" android:layout_marginBottom="30dp" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="12dp" android:layout_below="@id/showSpeed"/><TextView android:id="@+id/showTrip" android:layout_marginTop="30dp" android:layout_marginBottom="30dp" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="12dp" android:layout_below="@id/showVoltage"/><TextView android:id="@+id/showCurrent" android:layout_marginTop="30dp" android:layout_marginBottom="30dp" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="12dp" android:layout_below="@id/showTrip"/><TextView android:id="@+id/showTemp" android:layout_marginTop="30dp" android:layout_marginBottom="30dp" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="12dp" android:layout_below="@id/showCurrent"/>
 <!--view 3: when app show all devices enable to pair-->
 <TextView
     android:id= "@+id/devicesEnable"
@@ -86,4 +78,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:drawSelectorOnTop="false" />
+
+
 </RelativeLayout>
