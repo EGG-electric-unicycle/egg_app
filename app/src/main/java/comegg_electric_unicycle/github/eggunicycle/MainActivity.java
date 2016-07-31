@@ -95,13 +95,6 @@ public class MainActivity extends AppCompatActivity
         disconnect.setVisibility(View.INVISIBLE);
         list.setVisibility(View.INVISIBLE);
 
-
-
-        arrayList = new ArrayList<String>();
-
-        adapter = new ArrayAdapter<String>(getApplicationContext(), android.R.layout.simple_list_item_1, arrayList);
-        list.setAdapter(adapter);
-
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -117,6 +110,12 @@ public class MainActivity extends AppCompatActivity
             public void onClick(View v) {
                 findButtonClick();
            }
+        });
+
+        disconnect.setOnClickListener(new View.OnClickListener(){
+            public void onClick(View v) {
+                disconnectButtonClick();
+            }
         });
 
 
@@ -147,7 +146,12 @@ public class MainActivity extends AppCompatActivity
         unregisterReceiver(mReceiver);
         super.onDestroy();
     }
-    public void findButtonClick(){
+    public void findButtonClick()
+    {
+        //set adapter to show all devices in the listView
+        arrayList = new ArrayList<String>();
+        adapter = new ArrayAdapter<String>(getApplicationContext(), android.R.layout.simple_list_item_1, arrayList);
+        list.setAdapter(adapter);
 
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
@@ -173,8 +177,31 @@ public class MainActivity extends AppCompatActivity
         devicesEnable.setVisibility(View.VISIBLE);
         findDevices.setVisibility(View.INVISIBLE);
         list.setVisibility(View.VISIBLE);
+    }
 
+    public void disconnectButtonClick()
+    {
+        try {
+            inputStream.close();
+            socket.close();
+        } catch (IOException e1) {
+            e1.printStackTrace();
+        }
 
+        list.setAdapter(null);
+
+        connectedWith.setVisibility(View.INVISIBLE);
+        connectedWithC.setVisibility(View.INVISIBLE);
+        devicesEnable.setVisibility(View.INVISIBLE);
+        findDevices.setVisibility(View.VISIBLE);
+        disconnect.setVisibility(View.INVISIBLE);
+        list.setVisibility(View.INVISIBLE);
+
+        speedView.setVisibility(View.INVISIBLE);
+        voltageView.setVisibility(View.INVISIBLE);
+        tripView.setVisibility(View.INVISIBLE);
+        currentView.setVisibility(View.INVISIBLE);
+        tempView.setVisibility(View.INVISIBLE);
 
     }
 
@@ -186,6 +213,12 @@ public class MainActivity extends AppCompatActivity
         } catch (IOException e) {
             Toast.makeText(getBaseContext(), "Failed", Toast.LENGTH_LONG).show();
             connected=false;
+            try {
+                socket.close();
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            }
+
         }
         if (connected) {
           /*  try {
@@ -342,6 +375,8 @@ public class MainActivity extends AppCompatActivity
                                     case 10:
                                         state++;
                                         speed |= data;
+                                        if (speed>(65536/2))
+                                            speed= speed-65536;
                                         speed_=speed*0.036;
                                         break;
 
@@ -371,6 +406,8 @@ public class MainActivity extends AppCompatActivity
                                     case 16:
                                         state++;
                                         current |= data;
+                                        if (current>(65536/2))
+                                            current= current-65536;
                                         current_ = (current / 100.000);
                                         break;
 
