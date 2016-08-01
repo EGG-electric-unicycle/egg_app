@@ -62,7 +62,7 @@ public class MainActivity extends AppCompatActivity
     int bufferPosition;
     int state=0;
     int speed, voltage, trip, current, temperature;
-    double speed_, current_;
+    double speed_, current_, voltage_, trip_, temperature_;
     boolean end = false;
 
     public Vector<Byte> serialData = new Vector<Byte>();
@@ -104,6 +104,17 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
+        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
+        if(pairedDevices.size()>0)
+        {
+            for(BluetoothDevice pair : pairedDevices)
+            {
+                device=mBluetoothAdapter.getRemoteDevice(pair.getAddress());
+                connectToDevice();
+            }
+        }
+
 
         findDevices.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -144,6 +155,16 @@ public class MainActivity extends AppCompatActivity
     }
     protected void onDestroy() {
         unregisterReceiver(mReceiver);
+        try {
+            inputStream.close();
+            socket.close();
+        } catch (IOException e1) {
+            e1.printStackTrace();
+        }
+
+        list.setAdapter(null);
+
+
         super.onDestroy();
     }
     public void findButtonClick()
@@ -153,7 +174,7 @@ public class MainActivity extends AppCompatActivity
         adapter = new ArrayAdapter<String>(getApplicationContext(), android.R.layout.simple_list_item_1, arrayList);
         list.setAdapter(adapter);
 
-        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+       // mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
         if (mBluetoothAdapter == null) {
             Toast.makeText(getApplicationContext(), "Device doesnt Support Bluetooth", Toast.LENGTH_SHORT).show();
@@ -208,17 +229,22 @@ public class MainActivity extends AppCompatActivity
     public boolean connectToDevice(){
         boolean connected = true;
         try {
+
             socket = device.createRfcommSocketToServiceRecord(MY_UUID);
+
+
             socket.connect();
         } catch (IOException e) {
             Toast.makeText(getBaseContext(), "Failed", Toast.LENGTH_LONG).show();
-            connected=false;
-            try {
-                socket.close();
-            } catch (IOException e1) {
-                e1.printStackTrace();
-            }
+            connected = false;
+            if (socket != null) {
+                try {
+                    socket.close();
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                }
 
+            }
         }
         if (connected) {
           /*  try {
@@ -360,10 +386,13 @@ public class MainActivity extends AppCompatActivity
                                     // next 2 bytes are voltage
                                     case 7:
                                         state++;
+                                        voltage = (data<<8);
                                         break;
 
                                     case 8:
                                         state++;
+                                        voltage|= data;
+                                        voltage_ = voltage/100;
                                         break;
 
                                     // next 2 bytes are speed
@@ -383,18 +412,23 @@ public class MainActivity extends AppCompatActivity
                                     // next 4 bytes are trip distance
                                     case 11:
                                         state++;
+                                        trip = (data<< 24);
                                         break;
 
                                     case 12:
                                         state++;
+                                        trip |= (data<< 16);
                                         break;
 
                                     case 13:
                                         state++;
+                                        trip |= (data<< 8);
                                         break;
 
                                     case 14:
                                         state++;
+                                        trip |= data;
+                                        trip_ = trip/1000.0;
                                         break;
 
                                     // next 2 bytes are current
@@ -414,10 +448,16 @@ public class MainActivity extends AppCompatActivity
                                     // next 2 bytes are temperature
                                     case 17:
                                         state++;
+                                        temperature= (data<<8);
                                         break;
 
                                     case 18:
                                         state++;
+                                        temperature|= data;
+
+                                        if (temperature>(65536/2))
+                                            temperature=temperature-65536;
+                                        temperature_ = (temperature/340.0)+36.53;
                                         break;
 
                                     case 19:
@@ -454,23 +494,23 @@ public class MainActivity extends AppCompatActivity
 
                                                     speedView.setVisibility(View.VISIBLE);
                                                     voltageView.setVisibility(View.VISIBLE);
-                                                    tripView.setVisibility(View.INVISIBLE);
-                                                    currentView.setVisibility(View.INVISIBLE);
-                                                    tempView.setVisibility(View.INVISIBLE);
+                                                    tripView.setVisibility(View.VISIBLE);
+                                                    currentView.setVisibility(View.VISIBLE);
+                                                    tempView.setVisibility(View.VISIBLE);
 
 
 
 
 
-                                                    /*  speedView.setText("Speed: " + String.format("%2.1f", speed_) + " km/h");
-                                                    voltageView.setText("Voltage: " + Integer.toString(voltage) + " V");
-                                                    tripView.setText("Trip distance: " + Integer.toString(trip) + " Km");
+                                                    speedView.setText("Speed: " + String.format("%2.1f", speed_) + " km/h");
+                                                    voltageView.setText("Voltage: " + String.format("%2.1f",voltage_) + " V");
+                                                    tripView.setText("Trip distance: " +String.format("%2.2f",trip_) + " Km");
                                                     currentView.setText("Current: " + String.format("%2.2f", current_) + " A");
-                                                    tempView.setText("Temperature: " + Integer.toString(temperature) + " ºC");*/
+                                                    tempView.setText("Temperature: " + String.format("%2.1f",temperature_) + " ºC");
 
                                                     //only to test
-                                                    speedView.setText("Speed: " + String.format("%2.1f", speed_) + " km/h");
-                                                    voltageView.setText("Current: " + String.format("%2.2f", current_) + " A");
+                                                   // speedView.setText("Speed: " + String.format("%2.1f", speed_) + " km/h");
+                                                   // voltageView.setText("Current: " + String.format("%2.2f", current_) + " A");
 
 
                                                 }

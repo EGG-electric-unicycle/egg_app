@@ -13,6 +13,7 @@
     tools:showIn="@layout/app_bar_main">
 
 <!--view 1: when app begin-->
+
 <Button
     android:id="@+id/buttonFind"
     android:layout_marginTop="10dp"
@@ -34,8 +35,8 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:text="Connected With:"
-    android:textSize="22dp"
-    android:textColor="#6666ff"/>
+    android:textSize="24dp"/>
+    <!--android:textColor="#6666ff"/>-->
 
 <TextView
     android:id= "@+id/connectedWithC"
@@ -44,7 +45,7 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:text="xpto"
-    android:textSize="22dp"
+    android:textSize="24dp"
     android:layout_toRightOf="@id/connectedWith"/>
 
 <Button
@@ -59,7 +60,46 @@
     android:text="Disconnect"
     android:background="#d8dbda"
     android:layout_centerHorizontal="true"/>
-    <TextView android:id="@+id/showSpeed" android:layout_marginTop="30dp" android:layout_marginBottom="30dp" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="12dp" android:layout_below="@id/buttonDisconnect"/><TextView android:id="@+id/showVoltage" android:layout_marginTop="30dp" android:layout_marginBottom="30dp" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="12dp" android:layout_below="@id/showSpeed"/><TextView android:id="@+id/showTrip" android:layout_marginTop="30dp" android:layout_marginBottom="30dp" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="12dp" android:layout_below="@id/showVoltage"/><TextView android:id="@+id/showCurrent" android:layout_marginTop="30dp" android:layout_marginBottom="30dp" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="12dp" android:layout_below="@id/showTrip"/><TextView android:id="@+id/showTemp" android:layout_marginTop="30dp" android:layout_marginBottom="30dp" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="12dp" android:layout_below="@id/showCurrent"/>
+    <TextView
+        android:id="@+id/showSpeed"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="20dp"
+        android:layout_below="@id/buttonDisconnect"/>
+    <TextView
+        android:id="@+id/showVoltage"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="20dp"
+        android:layout_below="@id/showSpeed"/>
+    <TextView
+        android:id="@+id/showTrip"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="20dp"
+        android:layout_below="@id/showVoltage"/>
+    <TextView
+        android:id="@+id/showCurrent"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="20dp"
+        android:layout_below="@id/showTrip"/>
+    <TextView
+        android:id="@+id/showTemp"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="20dp"
+        android:layout_below="@id/showCurrent"/>
 <!--view 3: when app show all devices enable to pair-->
 <TextView
     android:id= "@+id/devicesEnable"
