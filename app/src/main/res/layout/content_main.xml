@@ -8,116 +8,438 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
+    android:background="#ff4949"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context="comegg_electric_unicycle.github.eggunicycle.MainActivity"
     tools:showIn="@layout/app_bar_main">
 
-<!--view 1: when app begin-->
+    <RelativeLayout
+        android:id = "@+id/bluetooth"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="5dp"
+        android:visibility="visible">
+        <TextView
+            android:id= "@+id/devicesEnable"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
+            android:paddingRight="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Enable Devices:"
+            android:textSize="24dp"
+            android:textColor="@color/colorText" />
+        <ListView
+            android:id="@+id/listDevices1"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:drawSelectorOnTop="false"
+            android:layout_below="@id/devicesEnable"/>
 
-<Button
-    android:id="@+id/buttonFind"
-    android:layout_marginTop="10dp"
-    android:layout_marginBottom="10dp"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:paddingLeft="10dp"
-    android:paddingRight="10dp"
-    android:text="Find device"
-    android:background="#d8dbda"
-    android:layout_centerHorizontal="true"/>
-<!--view 2: when app is connected with a device-->
-<TextView
-    android:id= "@+id/connectedWith"
-    android:layout_marginTop="30dp"
-    android:layout_marginBottom="30dp"
-    android:paddingLeft="10dp"
-    android:paddingRight="10dp"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:text="Connected With:"
-    android:textSize="24dp"/>
-    <!--android:textColor="#6666ff"/>-->
+        <ProgressBar
+            android:layout_alignParentRight="true"
+            android:id="@+id/pbHeaderProgress"
+            style="@android:style/Widget.ProgressBar.Large"
+            android:layout_marginTop="16dp"
+            android:layout_marginRight="10dp"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:visibility="invisible">
+        </ProgressBar>
 
-<TextView
-    android:id= "@+id/connectedWithC"
-    android:layout_marginTop="30dp"
-    android:layout_marginBottom="30dp"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:text="xpto"
-    android:textSize="24dp"
-    android:layout_toRightOf="@id/connectedWith"/>
+    </RelativeLayout>
+    <RelativeLayout
+        android:id = "@+id/welcome"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="5dp"
+        android:visibility="visible">
+        <ImageView
+            android:layout_height="150dp"
+            android:layout_width="150dp"
+            android:src="@mipmap/ic_launcher"
+            android:layout_centerInParent="true" />
 
-<Button
-    android:id="@+id/buttonDisconnect"
-    android:layout_below="@id/connectedWithC"
-    android:layout_marginTop="10dp"
-    android:layout_marginBottom="10dp"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:paddingLeft="10dp"
-    android:paddingRight="10dp"
-    android:text="Disconnect"
-    android:background="#d8dbda"
-    android:layout_centerHorizontal="true"/>
-    <TextView
-        android:id="@+id/showSpeed"
-        android:layout_marginTop="10dp"
-        android:layout_marginBottom="10dp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="20dp"
-        android:layout_below="@id/buttonDisconnect"/>
-    <TextView
-        android:id="@+id/showVoltage"
-        android:layout_marginTop="10dp"
-        android:layout_marginBottom="10dp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="20dp"
-        android:layout_below="@id/showSpeed"/>
-    <TextView
-        android:id="@+id/showTrip"
-        android:layout_marginTop="10dp"
-        android:layout_marginBottom="10dp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="20dp"
-        android:layout_below="@id/showVoltage"/>
-    <TextView
-        android:id="@+id/showCurrent"
-        android:layout_marginTop="10dp"
-        android:layout_marginBottom="10dp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="20dp"
-        android:layout_below="@id/showTrip"/>
-    <TextView
-        android:id="@+id/showTemp"
-        android:layout_marginTop="10dp"
-        android:layout_marginBottom="10dp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="20dp"
-        android:layout_below="@id/showCurrent"/>
-<!--view 3: when app show all devices enable to pair-->
-<TextView
-    android:id= "@+id/devicesEnable"
-    android:layout_marginTop="30dp"
-    android:layout_marginBottom="30dp"
-    android:paddingLeft="10dp"
-    android:paddingRight="10dp"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:text="Devices Found:"
-    android:textSize="22dp"
-    android:textColor="#6666ff" />
-<ListView
-    android:id="@+id/listDevices1"
-    android:layout_below="@id/devicesEnable"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:drawSelectorOnTop="false" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id = "@+id/home"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="5dp"
+        android:visibility="visible">
+
+        <LinearLayout
+            android:id = "@+id/speedView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="20dp"
+            android:layout_centerHorizontal="true">
+            <ImageView
+                android:id="@+id/iconSpeed"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:src="@drawable/ic_speed"
+                android:paddingRight= "5dp"
+                android:paddingBottom= "6dp"
+                android:layout_gravity="bottom" />
+            <TextView
+                android:id="@+id/showSpeed"
+                android:layout_width="105dp"
+                android:layout_height="wrap_content"
+                android:text="00.0"
+                android:gravity="right"
+                android:layout_gravity="bottom"
+                android:textSize="48dp"
+                android:textColor="@color/colorText"
+                android:paddingLeft= "5dp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Km/h"
+                android:layout_gravity= "bottom"
+                android:textSize="18dp"
+                android:textColor="@color/colorText"
+                android:paddingLeft= "5dp" />
+
+        </LinearLayout>
+
+        <TableLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@id/speedView"
+            android:stretchColumns="*">
+
+            <TableRow>
+            <LinearLayout
+                android:id = "@+id/chargeView"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:layout_marginBottom="10dp"
+                android:layout_column="0"
+                android:layout_width="0dp">
+                <ImageView
+                    android:id="@+id/iconCharge"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:src="@drawable/ic_charge"
+                    android:paddingBottom= "6dp"
+                    android:layout_gravity="bottom" />
+                <TextView
+                    android:id="@+id/showCharge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="100"
+                    android:layout_gravity="bottom"
+                    android:textSize="34dp"
+                    android:textColor="@color/colorText"
+                    android:paddingLeft= "10dp"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="%"
+                    android:layout_gravity="bottom"
+                    android:textSize="16dp"
+                    android:textColor="@color/colorText"
+                    android:paddingLeft= "5dp"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id = "@+id/tripView"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:layout_marginBottom="10dp"
+                android:layout_column="1"
+                android:layout_width="0dp">
+                <ImageView
+                    android:id="@+id/iconTrip"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:src="@drawable/ic_trip"
+                    android:paddingRight= "5dp"
+                    android:paddingBottom= "1dp"
+                    android:layout_gravity="bottom" />
+                <TextView
+                    android:id="@+id/showTrip"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="00.00"
+                    android:layout_gravity="bottom"
+                    android:textSize="34dp"
+                    android:textColor="@color/colorText"
+                    android:paddingLeft= "5dp"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Km"
+                    android:layout_gravity="bottom"
+                    android:textSize="16dp"
+                    android:textColor="@color/colorText"
+                    android:paddingLeft= "10dp"/>
+            </LinearLayout>
+            </TableRow>
 
 
-</RelativeLayout>
+        </TableLayout>
+
+        <ImageView
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:src="@drawable/ic_bell"
+            android:layout_centerHorizontal="true"
+            android:layout_alignParentBottom="true"/>
+
+    </RelativeLayout>
+
+
+    <RelativeLayout
+        android:id = "@+id/advanced"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="5dp"
+        android:visibility="invisible">
+
+
+        <LinearLayout
+            android:id = "@id/speedView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="20dp"
+            android:layout_centerHorizontal="true">
+            <ImageView
+                android:id="@id/iconSpeed"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:src="@drawable/ic_speed"
+                android:paddingRight= "5dp"
+                android:paddingBottom= "6dp"
+                android:layout_gravity="bottom" />
+            <TextView
+                android:id="@+id/showSpeedMore"
+                android:layout_width="105dp"
+                android:layout_height="wrap_content"
+                android:text="00.0"
+                android:gravity="right"
+                android:layout_gravity="bottom"
+                android:textSize="48dp"
+                android:textColor="@color/colorText"
+                android:paddingLeft= "5dp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Km/h"
+                android:layout_gravity= "bottom"
+                android:textSize="18dp"
+                android:textColor="@color/colorText"
+                android:paddingLeft= "5dp" />
+
+        </LinearLayout>
+
+        <TableLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@id/speedView"
+            android:stretchColumns="*">
+
+            <TableRow>
+                <LinearLayout
+                    android:id = "@id/chargeView"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:layout_marginBottom="10dp"
+                    android:layout_column="0"
+                    android:layout_width="0dp">
+                    <ImageView
+                        android:id="@id/iconCharge"
+                        android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:src="@drawable/ic_charge"
+                        android:paddingBottom= "6dp"
+                        android:layout_gravity="bottom" />
+                    <TextView
+                        android:id="@+id/showChargeMore"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="100"
+                        android:layout_gravity="bottom"
+                        android:textSize="34dp"
+                        android:textColor="@color/colorText"
+                        android:paddingLeft= "10dp"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="%"
+                        android:layout_gravity="bottom"
+                        android:textSize="16dp"
+                        android:textColor="@color/colorText"
+                        android:paddingLeft= "5dp"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id = "@id/tripView"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:layout_marginBottom="10dp"
+                    android:layout_column="1"
+                    android:layout_width="0dp">
+                    <ImageView
+                        android:id="@id/iconTrip"
+                        android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:src="@drawable/ic_trip"
+                        android:paddingRight= "5dp"
+                        android:paddingBottom= "1dp"
+                        android:layout_gravity="bottom" />
+                    <TextView
+                        android:id="@+id/showTripMore"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="00.00"
+                        android:layout_gravity="bottom"
+                        android:textSize="34dp"
+                        android:textColor="@color/colorText"
+                        android:paddingLeft= "5dp"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Km"
+                        android:layout_gravity="bottom"
+                        android:textSize="16dp"
+                        android:textColor="@color/colorText"
+                        android:paddingLeft= "10dp"/>
+                </LinearLayout>
+            </TableRow>
+        <TableRow>
+
+
+        <LinearLayout
+            android:id = "@+id/voltageView"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="20dp"
+            android:layout_column="0"
+            android:layout_width="0dp">
+            <ImageView
+                android:id="@+id/iconVoltage"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:src="@drawable/ic_voltage"
+                android:paddingRight= "5dp"
+                android:paddingBottom="1dp"
+                android:layout_gravity="bottom" />
+            <TextView
+                android:id="@+id/showVoltage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="00.0"
+                android:layout_gravity="bottom"
+                android:textSize="34dp"
+                android:textColor="@color/colorText"
+                android:paddingLeft= "10dp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="V"
+                android:layout_gravity="bottom"
+                android:textSize="16dp"
+                android:textColor="@color/colorText"
+                android:paddingLeft= "5dp"/>
+        </LinearLayout>
+
+            <LinearLayout
+                android:id = "@+id/tempView"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:layout_marginBottom="20dp"
+                android:layout_column="1"
+                android:layout_width="0dp">
+                <ImageView
+                    android:id="@+id/iconTemp"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:src="@drawable/ic_temp"
+                    android:paddingRight= "5dp"
+                    android:layout_gravity="center_vertical" />
+                <TextView
+                    android:id="@+id/showTemp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="00.0"
+                    android:layout_gravity="bottom"
+                    android:textSize="34dp"
+                    android:textColor="@color/colorText"
+                    android:paddingLeft= "10dp"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="ºC"
+                    android:layout_gravity="bottom"
+                    android:textSize="16dp"
+                    android:textColor="@color/colorText"
+                    android:paddingLeft= "5dp"/>
+            </LinearLayout>
+
+
+
+
+        </TableRow>
+      <TableRow>
+
+          <LinearLayout
+              android:id = "@+id/currentView"
+              android:layout_height="wrap_content"
+              android:layout_marginTop="20dp"
+              android:layout_marginBottom="20dp"
+              android:layout_column="0"
+              android:layout_width="0dp">
+              <ImageView
+                  android:id="@+id/iconCurrent"
+                  android:layout_height="wrap_content"
+                  android:layout_width="wrap_content"
+                  android:src="@drawable/ic_current"
+                  android:paddingRight= "10dp"
+                  android:paddingBottom= "4dp"
+                  android:layout_gravity="bottom" />
+              <TextView
+                  android:id="@+id/showCurrent"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:text="-00.00"
+                  android:layout_gravity="bottom"
+                  android:textSize="34dp"
+                  android:textColor="@color/colorText"
+                  android:paddingLeft= "10dp"/>
+              <TextView
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:text="A"
+                  android:layout_gravity="bottom"
+                  android:textSize="16dp"
+                  android:textColor="@color/colorText"
+                  android:paddingLeft= "5dp"/>
+          </LinearLayout>
+
+      </TableRow>
+        </TableLayout>
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id = "@+id/about"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="5dp"
+        android:visibility="invisible">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="dados aqui!!"
+            android:layout_gravity="bottom"
+            android:textSize="16dp"
+            android:textColor="@color/colorText"
+            android:paddingLeft= "10dp"/>
+
+    </RelativeLayout>
+
+    </RelativeLayout>
