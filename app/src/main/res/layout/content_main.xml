@@ -8,7 +8,7 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    android:background="#ff4949"
+    android:background="#000000"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context="comegg_electric_unicycle.github.eggunicycle.MainActivity"
     tools:showIn="@layout/app_bar_main">
@@ -17,8 +17,8 @@
         android:id = "@+id/bluetooth"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:padding="5dp"
-        android:visibility="visible">
+        android:padding="2dp"
+        android:visibility="invisible">
         <TextView
             android:id= "@+id/devicesEnable"
             android:layout_marginTop="10dp"
@@ -44,30 +44,33 @@
             android:layout_marginRight="10dp"
             android:layout_width="25dp"
             android:layout_height="25dp"
-            android:visibility="invisible">
+            android:visibility="visible">
         </ProgressBar>
 
     </RelativeLayout>
-    <RelativeLayout
-        android:id = "@+id/welcome"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:padding="5dp"
-        android:visibility="visible">
-        <ImageView
-            android:layout_height="150dp"
-            android:layout_width="150dp"
-            android:src="@mipmap/ic_launcher"
-            android:layout_centerInParent="true" />
 
-    </RelativeLayout>
 
     <RelativeLayout
         android:id = "@+id/home"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:padding="5dp"
-        android:visibility="visible">
+        android:padding="2dp"
+        android:visibility="invisible">
+        <RelativeLayout
+            android:id = "@+id/count"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true">
+            <TextView
+                android:id="@+id/showCount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="No connection"
+                android:gravity="right"
+                android:textSize="18dp"
+                android:textColor="@color/colorText" />
+            </RelativeLayout>
 
         <LinearLayout
             android:id = "@+id/speedView"
@@ -164,7 +167,7 @@
                     android:id="@+id/showTrip"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="00.00"
+                    android:text="0.00"
                     android:layout_gravity="bottom"
                     android:textSize="34dp"
                     android:textColor="@color/colorText"
@@ -197,9 +200,8 @@
         android:id = "@+id/advanced"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:padding="5dp"
+        android:padding="2dp"
         android:visibility="invisible">
-
 
         <LinearLayout
             android:id = "@id/speedView"
@@ -296,7 +298,7 @@
                         android:id="@+id/showTripMore"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="00.00"
+                        android:text="0.00"
                         android:layout_gravity="bottom"
                         android:textSize="34dp"
                         android:textColor="@color/colorText"
@@ -429,17 +431,159 @@
         android:id = "@+id/about"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:padding="5dp"
-        android:visibility="invisible">
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="dados aqui!!"
-            android:layout_gravity="bottom"
-            android:textSize="16dp"
-            android:textColor="@color/colorText"
-            android:paddingLeft= "10dp"/>
+        android:padding="2dp"
+        android:visibility="visible">
+        <ScrollView
+            android:id="@+id/ScrollView01"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent">
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="visible">
+                <TextView
+                    android:id="@+id/header1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="EGG Electric Unicycle app"
+                    android:textStyle="bold"
+                    android:layout_gravity="bottom"
+                    android:textSize="14dp"
+                    android:textColor="@color/colorText" />
+                <TextView
+                    android:id="@+id/text1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/header1"
+                    android:text="This app should work with Electric Unicycles that uses the MicroWorks 30B4 controller board."
+                    android:layout_gravity="bottom"
+                    android:autoLink="web"
+                    android:textSize="14dp"
+                    android:textColor="@color/colorText" />
+                <TextView
+                    android:id="@+id/text2"
+                    android:paddingTop="6dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/text1"
+                    android:text="EGG Electric Unicycle is a DIY and OpenSource Electric Unicycle that can be customized for specific needs (more batteries, powerful motor, lights, etc). Please read the project page here: https://github.com/EGG-electric-unicycle/documentation/wiki"
+                    android:layout_gravity="bottom"
+                    android:autoLink="web"
+                    android:textSize="14dp"
+                    android:textColor="@color/colorText" />
+                <TextView
+                    android:id="@+id/header2"
+                    android:paddingTop="10dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/text2"
+                    android:text="Motivation"
+                    android:textStyle="bold"
+                    android:layout_gravity="bottom"
+                    android:textSize="14dp"
+                    android:textColor="@color/colorText" />
+                <TextView
+                    android:id="@+id/text3"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/header2"
+                    android:text="There are a few reasons that move us everyday on developing OpenSource technology and knowledge for Electric Unicycles. Our inspiration comes from many successful OpenSource projects like: Wikipedia; Linux; Arduino; RepRap."
+                    android:layout_gravity="bottom"
+                    android:textSize="14dp"
+                    android:textColor="@color/colorText" />
+                <TextView
+                    android:id="@+id/text4"
+                    android:paddingTop="6dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/text3"
+                    android:text="We have kids and we want to improve the world for them, the new generations - we really believe in reducing the CO2 emissions for a greener environment."
+                    android:layout_gravity="bottom"
+                    android:textSize="14dp"
+                    android:textColor="@color/colorText" />
+                <TextView
+                    android:id="@+id/header3"
+                    android:paddingTop="10dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/text4"
+                    android:text="Acknowledgments"
+                    android:textStyle="bold"
+                    android:layout_gravity="bottom"
+                    android:textSize="14dp"
+                    android:textColor="@color/colorText" />
+                <TextView
+                    android:id="@+id/topic1"
+                    android:paddingTop="0dp"
+                    android:paddingLeft="6dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/header3"
+                    android:text="- ElectricUnicycleOrg community forum: http://forum.electricunicycle.org/"
+                    android:autoLink="web"
+                    android:layout_gravity="bottom"
+                    android:textSize="14dp"
+                    android:textColor="@color/colorText" />
+                <TextView
+                    android:id="@+id/topic2"
+                    android:paddingTop="6dp"
+                    android:paddingLeft="6dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/topic1"
+                    android:text="- MicroWorks for selling unitary components for Electric Unicycle and stimulate DIY: http://microworks.en.alibaba.com/"
+                    android:autoLink="web"
+                    android:layout_gravity="bottom"
+                    android:textSize="14dp"
+                    android:textColor="@color/colorText" />
+                <TextView
+                    android:id="@+id/topic3"
+                    android:paddingTop="6dp"
+                    android:paddingLeft="6dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/topic2"
+                    android:text="- Wheelemetrics OpenSource app from Esaj: https://github.com/esaj/Wheelemetrics"
+                    android:autoLink="web"
+                    android:layout_gravity="bottom"
+                    android:textSize="14dp"
+                    android:textColor="@color/colorText" />
+                <TextView
+                    android:id="@+id/topic4"
+                    android:paddingTop="6dp"
+                    android:paddingLeft="6dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/topic3"
+                    android:text="- Esaj and others that documented the data protocol sent by Bluetooth: http://forum.electricunicycle.org/topic/870-gotwaykingsong-protocol-reverse-engineering"
+                    android:autoLink="web"
+                    android:layout_gravity="bottom"
+                    android:textSize="14dp"
+                    android:textColor="@color/colorText" />
+                <TextView
+                    android:id="@+id/header4"
+                    android:paddingTop="10dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/topic4"
+                    android:text="License"
+                    android:textStyle="bold"
+                    android:layout_gravity="bottom"
+                    android:textSize="14dp"
+                    android:textColor="@color/colorText" />
+                <TextView
+                    android:id="@+id/text5"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/header4"
+                    android:text="EGG Electric Unicycle app has a GNU GENERAL PUBLIC LICENSE Version 3 because we believe in OpenSource. Please do not use this app and/or code in products that are closed source or are crippled by a patent."
+                    android:layout_gravity="bottom"
+                    android:autoLink="web"
+                    android:textSize="14dp"
+                    android:textColor="@color/colorText" />
 
+            </RelativeLayout>
+        </ScrollView>
     </RelativeLayout>
 
-    </RelativeLayout>
+</RelativeLayout>

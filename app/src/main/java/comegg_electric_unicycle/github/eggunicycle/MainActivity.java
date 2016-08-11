@@ -7,6 +7,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -44,26 +45,30 @@ import java.util.Vector;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
+    private static final int NOCONNECT = 0;
+    private static final int CONNECT = 1;
+
     private BluetoothDevice device;
     private BluetoothSocket socket;
    // private OutputStream outputStream;
     private InputStream inputStream;
     private BluetoothAdapter mBluetoothAdapter = null;
     private static final UUID MY_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
-    private boolean connected = true;
+    private boolean connected = false;
+    String dev;
     //UI
     ArrayList<String> arrayList;
     ArrayAdapter<String> adapter;
     private ListView list;
-    private TextView  devicesEnable, speedView, voltageView, tripView, currentView, tempView, chargeView, chargeViewAdvanced, speedViewAdvanced, tripViewAdvanced;
-    private RelativeLayout welcome, main, advanced, bluetooth, about ;
+    private TextView  devicesEnable, speedView, voltageView, tripView, currentView, tempView, chargeView, chargeViewAdvanced, speedViewAdvanced, tripViewAdvanced, countView;
+    private RelativeLayout main, advanced, bluetooth, about ;
 
     boolean stopThread;
     Thread thread;
     byte buffer[];
     int bufferPosition;
     int state=0;
-    int speed, voltage, trip, current, temperature;
+    int speed, voltage, trip, current, temperature, count;
     double speed_, current_, voltage_, trip_, temperature_;
     boolean end = false;
     NavigationView navigationView;
@@ -80,7 +85,6 @@ public class MainActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
 
         //UI
-        welcome= (RelativeLayout) findViewById(R.id.welcome);
         main= (RelativeLayout) findViewById(R.id.home);
         bluetooth = (RelativeLayout) findViewById(R.id.bluetooth);
         about = (RelativeLayout) findViewById(R.id.about);
@@ -96,12 +100,10 @@ public class MainActivity extends AppCompatActivity
         speedViewAdvanced = (TextView) findViewById(R.id.showSpeedMore);
         tripViewAdvanced = (TextView) findViewById(R.id.showTripMore);
         list = (ListView) findViewById(R.id.listDevices1);
+        countView=(TextView) findViewById(R.id.showCount);
 
-        welcome.setVisibility(View.VISIBLE);
-        main.setVisibility(View.INVISIBLE);
-        bluetooth.setVisibility(View.INVISIBLE);
-        about.setVisibility(View.INVISIBLE);
-        advanced.setVisibility(View.INVISIBLE);
+
+
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -112,10 +114,39 @@ public class MainActivity extends AppCompatActivity
         navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
+
+        //listener to show item click in list of enable devices found
+        list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position,
+                                    long id) {
+
+                // Cancel discovery because it's costly and we're about to connect
+                mBluetoothAdapter.cancelDiscovery();
+                runOnUiThread(new Runnable() {  public void run() {  findViewById(R.id.pbHeaderProgress).setVisibility(View.VISIBLE);}});
+
+                // Get the device MAC address, which is the last 17 chars in the View
+                String item = ((TextView) view).getText().toString();
+                String address = item.substring(item.length() - 17);
+
+                //Toast.makeText(getBaseContext(), item, Toast.LENGTH_LONG).show();
+                device = mBluetoothAdapter.getRemoteDevice(address);
+                countView.setVisibility(View.VISIBLE);
+                connectToDevice();
+
+            }
+        });
+    }
+    protected void onStart(){
+
+
+        count =0;
         //check if in memory exist some valid address saved in the past
         SharedPreferences memoryDevice  = getSharedPreferences("MyPrefsDevice", 0);
         String addressInMemory = memoryDevice.getString("deviceAdress", null);
         if (!(addressInMemory == null)) {
+
+            onNavigationItemSelected(navigationView.getMenu().getItem(0));
             try {
                 mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
                 if (!mBluetoothAdapter.isEnabled()) {  //check if bluetooth is on
@@ -129,7 +160,9 @@ public class MainActivity extends AppCompatActivity
                 }
 
                 device = mBluetoothAdapter.getRemoteDevice(addressInMemory);   //set device address
+                countView.setVisibility(View.VISIBLE);
                 connectToDevice();
+
             }
             catch (InternalError a) {
                 //if some error occurs go to bluetooth connection menu (manually connection)
@@ -142,41 +175,10 @@ public class MainActivity extends AppCompatActivity
             onNavigationItemSelected(navigationView.getMenu().getItem(2));
         }
 
+        super.onStart();
 
-
-     /*   disconnect.setOnClickListener(new View.OnClickListener(){
-            public void onClick(View v) {
-                disconnectButtonClick();
-            }
-        });*/
-
-
-        // Get local Bluetooth adapter
-
-
-        //listener to show item click in list of enable devices found
-        list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position,
-                                    long id) {
-
-                // Cancel discovery because it's costly and we're about to connect
-                mBluetoothAdapter.cancelDiscovery();
-
-
-                // Get the device MAC address, which is the last 17 chars in the View
-                String item = ((TextView) view).getText().toString();
-                String address = item.substring(item.length() - 17);
-
-                //Toast.makeText(getBaseContext(), item, Toast.LENGTH_LONG).show();
-                device = mBluetoothAdapter.getRemoteDevice(address);
-              //  runOnUiThread(new Runnable() {  public void run() {  findViewById(R.id.pbHeaderProgress).setVisibility(View.VISIBLE);}});
-                connectToDevice();
-
-
-            }
-        });
     }
+
     protected void onDestroy() {
         unregisterReceiver(mReceiver);
         try {
@@ -187,8 +189,6 @@ public class MainActivity extends AppCompatActivity
         }
 
         list.setAdapter(null);
-
-
         super.onDestroy();
     }
     public void showEnableDevices()
@@ -234,73 +234,107 @@ public class MainActivity extends AppCompatActivity
 
     }
 
-    public boolean connectToDevice(){
+    private void connectToDevice(){
+       Thread backgroundThread = new Thread() {
+           @Override
+           public void run() {
 
-        connected = true;
-        BluetoothSocket tmp = null;
+               count++;
+               runOnUiThread(new Runnable() {
+                   public void run() {
+                       countView.setText("Try to connect: " + count + " times");
+                   }
+               });
 
-        try {
-            tmp = device.createRfcommSocketToServiceRecord(MY_UUID);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        socket = tmp;
+               boolean isConnected = true;
+               BluetoothSocket tmp = null;
 
-                try {
-                    // This is a blocking call and will only return on a
-                    // successful connection or an exception
-                    socket.connect();
-                } catch (IOException e) {
-                    //connection to device failed so close the socket
+               try {
+                   tmp = device.createRfcommSocketToServiceRecord(MY_UUID);
+               } catch (IOException e) {
+                   e.printStackTrace();
+               }
+               socket = tmp;
 
-                    try {
-                        connected = false;
-                        socket.close();
+               try {
+                   // This is a blocking call and will only return on a
+                   // successful connection or an exception
+                   socket.connect();
+               } catch (IOException e) {
+                   //connection to device failed so close the socket
 
-                    } catch (IOException e2) {
-                        e2.printStackTrace();
-                    }
-                }
+                   try {
+                       isConnected = false;
+                       socket.close();
+
+                   } catch (IOException e2) {
+                       e2.printStackTrace();
+                   }
+               }
 
 
-        if (connected) {
+               if (isConnected) {
           /*  try {
                 outputStream=socket.getOutputStream();
             } catch (IOException e) {
                 Toast.makeText(getBaseContext(), "Failed", Toast.LENGTH_LONG).show();
             }*/
-            try {
-                inputStream=socket.getInputStream();
-            } catch (IOException e) {
-                runOnUiThread(new Runnable() {  public void run() { Toast.makeText(getBaseContext(), "Failed", Toast.LENGTH_LONG).show();}});
-            }
+                   try {
+                       inputStream = socket.getInputStream();
+                   } catch (IOException e) {
+                       runOnUiThread(new Runnable() {
+                           public void run() {
+                               Toast.makeText(getBaseContext(), "Failed", Toast.LENGTH_LONG).show();
+                           }
+                       });
+                   }
+                   // finished second step
+                   Message msg = Message.obtain();
+                   msg.what = CONNECT;
+                   handler.sendMessage(msg);
 
-        }
-        if (connected) {
-            //connection to device with sucess. Address of device is saved in SharedPreferences
-            SharedPreferences memoryDevice = getSharedPreferences("MyPrefsDevice", 0);
-            SharedPreferences.Editor editor = memoryDevice.edit();
-            editor.putString("deviceAdress", device.getAddress());
-            editor.commit();
+               } else {
+                   // finished second step
+                   Message msg = Message.obtain();
+                   msg.what = NOCONNECT;
+                   handler.sendMessage(msg);
+               }
+           }
+       };
 
-            //start data listening
-            beginListenForData();
+        backgroundThread.start();
 
-
-        } else if (!connected) {
-            connectToDevice();
-        }
-        return connected;
     }
 
+    private Handler handler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case CONNECT:
+                    countView.setVisibility(View.INVISIBLE);
+                    //connection to device with sucess. Address of device is saved in SharedPreferences
+                    SharedPreferences memoryDevice = getSharedPreferences("MyPrefsDevice", 0);
+                    SharedPreferences.Editor editor = memoryDevice.edit();
+                    editor.putString("deviceAdress", device.getAddress());
+                    editor.commit();
 
-    @SuppressWarnings("StatementWithEmptyBody")
-    @Override
+                    //start data listening
+                    beginListenForData();
+                    break;
+                case NOCONNECT:
+                    connectToDevice();
+                    break;
+            }
+        }
+    };
+
+
+    //@SuppressWarnings("StatementWithEmptyBody")
+    //@Override
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
         if (id == R.id.ic_menu_home){
-            welcome.setVisibility(View.INVISIBLE);
             main.setVisibility(View.VISIBLE);
             bluetooth.setVisibility(View.INVISIBLE);
             about.setVisibility(View.INVISIBLE);
@@ -308,7 +342,6 @@ public class MainActivity extends AppCompatActivity
 
         }
         if (id == R.id.ic_menu_advanced){
-            welcome.setVisibility(View.INVISIBLE);
             main.setVisibility(View.INVISIBLE);
             bluetooth.setVisibility(View.INVISIBLE);
             about.setVisibility(View.INVISIBLE);
@@ -317,7 +350,6 @@ public class MainActivity extends AppCompatActivity
         }
 
         if (id == R.id.ic_menu_bluetooth){
-            welcome.setVisibility(View.INVISIBLE);
             main.setVisibility(View.INVISIBLE);
             bluetooth.setVisibility(View.VISIBLE);
             about.setVisibility(View.INVISIBLE);
@@ -326,7 +358,6 @@ public class MainActivity extends AppCompatActivity
         }
 
         if (id == R.id.ic_menu_about){
-            welcome.setVisibility(View.INVISIBLE);
             main.setVisibility(View.INVISIBLE);
             bluetooth.setVisibility(View.INVISIBLE);
             about.setVisibility(View.VISIBLE);
@@ -347,7 +378,7 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void run() {
                 onNavigationItemSelected(navigationView.getMenu().getItem(0));}});
-        final Handler handler = new Handler();
+       // final Handler handler = new Handler();
         stopThread = false;
         buffer = new byte[1024];
         Thread thread  = new Thread(new Runnable()
@@ -613,10 +644,14 @@ public void processData() {
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
             if (BluetoothDevice.ACTION_FOUND.equals(action)) {
+                findViewById(R.id.pbHeaderProgress).setVisibility(View.INVISIBLE);
                 BluetoothDevice deviceFound = intent
                         .getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                 arrayList.add(deviceFound.getName() + "\n" + deviceFound.getAddress());
                 adapter.notifyDataSetChanged();
+
+            }
+            else if (BluetoothDevice.ACTION_ACL_DISCONNECTED.equals(action)) {
 
             }
             if (arrayList.isEmpty()) {
