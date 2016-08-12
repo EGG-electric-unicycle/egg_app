@@ -41,8 +41,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.Vector;
 
-
-
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -51,11 +49,11 @@ public class MainActivity extends AppCompatActivity
 
     private BluetoothDevice device;
     private BluetoothSocket socket;
-    private OutputStream outputStream;
-    private InputStream inputStream;
+    public static OutputStream outputStream;
+    public static InputStream inputStream;
     private BluetoothAdapter mBluetoothAdapter = null;
     private static final UUID MY_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
-    private boolean connected = false;
+    public static boolean isConnected = false;
     String dev;
     //UI
     ArrayList<String> arrayList;
@@ -74,6 +72,8 @@ public class MainActivity extends AppCompatActivity
     NavigationView navigationView;
 
     public Vector<Byte> serialData = new Vector<Byte>();
+
+    EUCCommands SendEUCCommand = new EUCCommands();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -107,6 +107,7 @@ public class MainActivity extends AppCompatActivity
 
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.setDrawerListener(toggle);
@@ -124,7 +125,11 @@ public class MainActivity extends AppCompatActivity
 
                 // Cancel discovery because it's costly and we're about to connect
                 mBluetoothAdapter.cancelDiscovery();
-                runOnUiThread(new Runnable() {  public void run() {  findViewById(R.id.pbHeaderProgress).setVisibility(View.VISIBLE);}});
+                runOnUiThread(new Runnable() {
+                    public void run() {
+                        findViewById(R.id.pbHeaderProgress).setVisibility(View.VISIBLE);
+                    }
+                });
 
                 // Get the device MAC address, which is the last 17 chars in the View
                 String item = ((TextView) view).getText().toString();
@@ -142,32 +147,29 @@ public class MainActivity extends AppCompatActivity
         final Button buttonBeep = (Button) findViewById(R.id.buttonBeep);
         buttonBeep.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                try {
-                    outputStream.write(98); // send 'b' to beep
-                }
-                catch (IOException a) {
-                }
+                SendEUCCommand.beep();
             }
         });
+
         //the action code for button soft mode
         final Button buttonSoft = (Button) findViewById(R.id.soft);
         buttonSoft.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                //action code
+                SendEUCCommand.setRideMode(EUCCommands.rideModes.SOFT);
             }
         });
         //the action code for button confort mode
-        final Button buttonConfort = (Button) findViewById(R.id.confort);
-        buttonConfort.setOnClickListener(new View.OnClickListener() {
+        final Button buttonComfort = (Button) findViewById(R.id.comfort);
+        buttonComfort.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                //action code
+                SendEUCCommand.setRideMode(EUCCommands.rideModes.COMFORT);
             }
         });
         //the action code for button madden mode
         final Button buttonMadden = (Button) findViewById(R.id.madden);
         buttonMadden.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                //action code
+                SendEUCCommand.setRideMode(EUCCommands.rideModes.MADDEN);
             }
         });
 
@@ -175,9 +177,10 @@ public class MainActivity extends AppCompatActivity
         final Button buttonCalibration = (Button) findViewById(R.id.horizontalCalib);
         buttonCalibration.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-               //action code
+               SendEUCCommand.setHorizontalCalibration();
             }
         });
+
 
     }
     protected void onStart(){
@@ -291,8 +294,8 @@ public class MainActivity extends AppCompatActivity
                    }
                });
 
-               boolean isConnected = true;
                BluetoothSocket tmp = null;
+               isConnected = true;
 
                try {
                    tmp = device.createRfcommSocketToServiceRecord(MY_UUID);

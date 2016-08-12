@@ -622,14 +622,14 @@
                 android:layout_height="wrap_content"
                 android:text="Soft" />
             <Button
-                android:id="@+id/confort"
+                android:id="@+id/comfort"
                 android:layout_below="@id/soft"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Confort" />
+                android:text="Comfort" />
             <Button
                 android:id="@+id/madden"
-                android:layout_below="@id/confort"
+                android:layout_below="@id/comfort"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Madden" />
