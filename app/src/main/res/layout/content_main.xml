@@ -55,7 +55,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:padding="2dp"
-        android:visibility="visible">
+        android:visibility="invisible">
         <RelativeLayout
             android:id = "@+id/count"
             android:layout_width="wrap_content"
@@ -587,4 +587,84 @@
         </ScrollView>
     </RelativeLayout>
 
+    <RelativeLayout
+        android:id = "@+id/calibration"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="2dp"
+        android:visibility="visible">
+        <RelativeLayout
+            android:id = "@+id/modeLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="30dp"
+            android:visibility="visible">
+            <ImageView
+                android:id="@+id/detailsMode"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_question"
+                android:padding="6dp"
+                android:layout_alignParentRight="true"/>
+            <TextView
+                android:id="@+id/mode"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingBottom="8dp"
+                android:text="Mode:"
+                android:textSize="22dp"
+                android:textColor="@color/colorText"/>
+
+            <Button
+                android:id="@+id/soft"
+                android:layout_below="@id/mode"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Soft" />
+            <Button
+                android:id="@+id/confort"
+                android:layout_below="@id/soft"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Confort" />
+            <Button
+                android:id="@+id/madden"
+                android:layout_below="@id/confort"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Madden" />
+          </RelativeLayout>
+
+        <RelativeLayout
+            android:id = "@+id/alignmentLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/modeLayout"
+            android:visibility="visible">
+            <ImageView
+                android:id="@+id/detailsAlignment"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_question"
+                android:padding="6dp"
+                android:layout_alignParentRight="true"/>
+
+            <TextView
+                android:id="@+id/alignment"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingBottom="8dp"
+                android:text="Alignment:"
+                android:textSize="22dp"
+                android:textColor="@color/colorText"/>
+
+            <Button
+                android:id="@+id/horizontalCalib"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/alignment"
+                android:text="Horizontal Calibration" />
+
+        </RelativeLayout>
+    </RelativeLayout>
 </RelativeLayout>

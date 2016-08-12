@@ -62,7 +62,7 @@ public class MainActivity extends AppCompatActivity
     ArrayAdapter<String> adapter;
     private ListView list;
     private TextView  devicesEnable, speedView, voltageView, tripView, currentView, tempView, chargeView, chargeViewAdvanced, speedViewAdvanced, tripViewAdvanced, countView;
-    private RelativeLayout main, advanced, bluetooth, about ;
+    private RelativeLayout main, advanced, bluetooth, about, calibration ;
 
     boolean stopThread;
     Thread thread;
@@ -89,6 +89,7 @@ public class MainActivity extends AppCompatActivity
         bluetooth = (RelativeLayout) findViewById(R.id.bluetooth);
         about = (RelativeLayout) findViewById(R.id.about);
         advanced = (RelativeLayout) findViewById(R.id.advanced);
+        calibration=(RelativeLayout) findViewById(R.id.calibration);
         devicesEnable=(TextView) findViewById(R.id.devicesEnable);
         speedView = (TextView) findViewById(R.id.showSpeed);
         voltageView = (TextView) findViewById(R.id.showVoltage);
@@ -148,6 +149,36 @@ public class MainActivity extends AppCompatActivity
                 }
             }
         });
+        //the action code for button soft mode
+        final Button buttonSoft = (Button) findViewById(R.id.soft);
+        buttonSoft.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                //action code
+            }
+        });
+        //the action code for button confort mode
+        final Button buttonConfort = (Button) findViewById(R.id.confort);
+        buttonConfort.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                //action code
+            }
+        });
+        //the action code for button madden mode
+        final Button buttonMadden = (Button) findViewById(R.id.madden);
+        buttonMadden.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                //action code
+            }
+        });
+
+        //the action code for button horizontal calibration
+        final Button buttonCalibration = (Button) findViewById(R.id.horizontalCalib);
+        buttonCalibration.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+               //action code
+            }
+        });
+
     }
     protected void onStart(){
 
@@ -359,6 +390,7 @@ public class MainActivity extends AppCompatActivity
             bluetooth.setVisibility(View.INVISIBLE);
             about.setVisibility(View.INVISIBLE);
             advanced.setVisibility(View.INVISIBLE);
+            calibration.setVisibility(View.INVISIBLE);
 
         }
         if (id == R.id.ic_menu_advanced){
@@ -366,6 +398,7 @@ public class MainActivity extends AppCompatActivity
             bluetooth.setVisibility(View.INVISIBLE);
             about.setVisibility(View.INVISIBLE);
             advanced.setVisibility(View.VISIBLE);
+            calibration.setVisibility(View.INVISIBLE);
 
         }
 
@@ -374,7 +407,18 @@ public class MainActivity extends AppCompatActivity
             bluetooth.setVisibility(View.VISIBLE);
             about.setVisibility(View.INVISIBLE);
             advanced.setVisibility(View.INVISIBLE);
+            calibration.setVisibility(View.INVISIBLE);
             showEnableDevices();
+        }
+
+
+        if (id == R.id.ic_menu_calibration){
+            main.setVisibility(View.INVISIBLE);
+            bluetooth.setVisibility(View.INVISIBLE);
+            about.setVisibility(View.INVISIBLE);
+            advanced.setVisibility(View.INVISIBLE);
+            calibration.setVisibility(View.VISIBLE);
+
         }
 
         if (id == R.id.ic_menu_about){
@@ -382,6 +426,7 @@ public class MainActivity extends AppCompatActivity
             bluetooth.setVisibility(View.INVISIBLE);
             about.setVisibility(View.VISIBLE);
             advanced.setVisibility(View.INVISIBLE);
+            calibration.setVisibility(View.INVISIBLE);
 
         }
 
