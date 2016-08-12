@@ -558,9 +558,8 @@ public void processData() {
                 break;
 
             case 20:
-                if (data == 0) {
-                    state++;
-                } else state = 0;
+                state++; // I have seen data to equal 0, 1 and 2. In one 30B4 board,
+                // this value is always 0 while on the other can be 1 or 2 at least.
                 break;
 
             case 21:
