@@ -41,8 +41,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.Vector;
 
-
-
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -51,11 +49,11 @@ public class MainActivity extends AppCompatActivity
 
     private BluetoothDevice device;
     private BluetoothSocket socket;
-    private OutputStream outputStream;
-    private InputStream inputStream;
+    public static OutputStream outputStream;
+    public static InputStream inputStream;
     private BluetoothAdapter mBluetoothAdapter = null;
     private static final UUID MY_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
-    private boolean connected = false;
+    public static boolean isConnected = false;
     String dev;
     //UI
     ArrayList<String> arrayList;
@@ -74,6 +72,8 @@ public class MainActivity extends AppCompatActivity
     NavigationView navigationView;
 
     public Vector<Byte> serialData = new Vector<Byte>();
+
+    EUCCommands SendEUCCommand = new EUCCommands();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -106,48 +106,51 @@ public class MainActivity extends AppCompatActivity
 
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.setDrawerListener(toggle);
-        toggle.syncState();
+        {
+            ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                    this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+            drawer.setDrawerListener(toggle);
+            toggle.syncState();
 
-        navigationView = (NavigationView) findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
+            navigationView = (NavigationView) findViewById(R.id.nav_view);
+            navigationView.setNavigationItemSelectedListener(this);
 
 
-        //listener to show item click in list of enable devices found
-        list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position,
-                                    long id) {
+            //listener to show item click in list of enable devices found
+            list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position,
+                                        long id) {
 
-                // Cancel discovery because it's costly and we're about to connect
-                mBluetoothAdapter.cancelDiscovery();
-                runOnUiThread(new Runnable() {  public void run() {  findViewById(R.id.pbHeaderProgress).setVisibility(View.VISIBLE);}});
+                    // Cancel discovery because it's costly and we're about to connect
+                    mBluetoothAdapter.cancelDiscovery();
+                    runOnUiThread(new Runnable() {
+                        public void run() {
+                            findViewById(R.id.pbHeaderProgress).setVisibility(View.VISIBLE);
+                        }
+                    });
 
-                // Get the device MAC address, which is the last 17 chars in the View
-                String item = ((TextView) view).getText().toString();
-                String address = item.substring(item.length() - 17);
+                    // Get the device MAC address, which is the last 17 chars in the View
+                    String item = ((TextView) view).getText().toString();
+                    String address = item.substring(item.length() - 17);
 
-                //Toast.makeText(getBaseContext(), item, Toast.LENGTH_LONG).show();
-                device = mBluetoothAdapter.getRemoteDevice(address);
-                countView.setVisibility(View.VISIBLE);
-                connectToDevice();
+                    //Toast.makeText(getBaseContext(), item, Toast.LENGTH_LONG).show();
+                    device = mBluetoothAdapter.getRemoteDevice(address);
+                    countView.setVisibility(View.VISIBLE);
+                    connectToDevice();
 
-            }
-        });
+                }
+            });
 
         // the action code for button beep
         final Button buttonBeep = (Button) findViewById(R.id.buttonBeep);
         buttonBeep.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                try {
-                    outputStream.write(98); // send 'b' to beep
-                }
-                catch (IOException a) {
-                }
+                SendEUCCommand.beep();
             }
         });
+
+        }
     }
     protected void onStart(){
 
@@ -260,8 +263,8 @@ public class MainActivity extends AppCompatActivity
                    }
                });
 
-               boolean isConnected = true;
                BluetoothSocket tmp = null;
+               isConnected = true;
 
                try {
                    tmp = device.createRfcommSocketToServiceRecord(MY_UUID);
