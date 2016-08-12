@@ -17,6 +17,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -50,7 +51,7 @@ public class MainActivity extends AppCompatActivity
 
     private BluetoothDevice device;
     private BluetoothSocket socket;
-   // private OutputStream outputStream;
+    private OutputStream outputStream;
     private InputStream inputStream;
     private BluetoothAdapter mBluetoothAdapter = null;
     private static final UUID MY_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
@@ -70,7 +71,6 @@ public class MainActivity extends AppCompatActivity
     int state=0;
     int speed, voltage, trip, current, temperature, count;
     double speed_, current_, voltage_, trip_, temperature_;
-    boolean end = false;
     NavigationView navigationView;
 
     public Vector<Byte> serialData = new Vector<Byte>();
@@ -136,6 +136,18 @@ public class MainActivity extends AppCompatActivity
 
             }
         });
+
+        // the action code for button beep
+        final Button buttonBeep = (Button) findViewById(R.id.buttonBeep);
+        buttonBeep.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                try {
+                    outputStream.write(98); // send 'b' to beep
+                }
+                catch (IOException a) {
+                }
+            }
+        });
     }
     protected void onStart(){
 
@@ -183,6 +195,7 @@ public class MainActivity extends AppCompatActivity
         unregisterReceiver(mReceiver);
         try {
             inputStream.close();
+            outputStream.close();
             socket.close();
         } catch (IOException e1) {
             e1.printStackTrace();
@@ -225,6 +238,7 @@ public class MainActivity extends AppCompatActivity
     {
         try {
             inputStream.close();
+            outputStream.close();
             socket.close();
         } catch (IOException e1) {
             e1.printStackTrace();
@@ -274,27 +288,33 @@ public class MainActivity extends AppCompatActivity
 
 
                if (isConnected) {
-          /*  try {
-                outputStream=socket.getOutputStream();
-            } catch (IOException e) {
-                Toast.makeText(getBaseContext(), "Failed", Toast.LENGTH_LONG).show();
-            }*/
                    try {
                        inputStream = socket.getInputStream();
                    } catch (IOException e) {
                        runOnUiThread(new Runnable() {
                            public void run() {
-                               Toast.makeText(getBaseContext(), "Failed", Toast.LENGTH_LONG).show();
+                               Toast.makeText(getBaseContext(), "Failed: socket.getInputStream();", Toast.LENGTH_LONG).show();
                            }
                        });
                    }
-                   // finished second step
+
+                   try {
+                       outputStream=socket.getOutputStream();
+                   } catch (IOException e) {
+                       runOnUiThread(new Runnable() {
+                           public void run() {
+                               Toast.makeText(getBaseContext(), "Failed: socket.getOutputStream();", Toast.LENGTH_LONG).show();
+                           }
+                       });
+                   }
+
+                   // finished thread
                    Message msg = Message.obtain();
                    msg.what = CONNECT;
                    handler.sendMessage(msg);
 
                } else {
-                   // finished second step
+                   // finished thread
                    Message msg = Message.obtain();
                    msg.what = NOCONNECT;
                    handler.sendMessage(msg);
@@ -392,9 +412,7 @@ public class MainActivity extends AppCompatActivity
                         int byteCount = inputStream.available();
                         if(byteCount > 0)
                         {
-                            end=false;
                             final byte[] rawBytes = new byte[byteCount];
-
                             inputStream.read(rawBytes);
 
                             // store all received bytes on vector
@@ -405,7 +423,6 @@ public class MainActivity extends AppCompatActivity
                         }
 
                         processData();
-
                     }
                     catch (IOException ex)
                     {

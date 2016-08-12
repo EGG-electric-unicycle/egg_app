@@ -55,7 +55,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:padding="2dp"
-        android:visibility="invisible">
+        android:visibility="visible">
         <RelativeLayout
             android:id = "@+id/count"
             android:layout_width="wrap_content"
@@ -186,10 +186,11 @@
 
         </TableLayout>
 
-        <ImageView
+        <Button
+            android:id="@+id/buttonBeep"
             android:layout_width="200dp"
             android:layout_height="200dp"
-            android:src="@drawable/ic_bell"
+            android:background="@drawable/ic_bell"
             android:layout_centerHorizontal="true"
             android:layout_alignParentBottom="true"/>
 
@@ -432,7 +433,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:padding="2dp"
-        android:visibility="visible">
+        android:visibility="invisible">
         <ScrollView
             android:id="@+id/ScrollView01"
             android:layout_width="fill_parent"
