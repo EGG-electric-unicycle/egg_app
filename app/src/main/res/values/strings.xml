@@ -6,4 +6,14 @@
 
     <string name="action_settings">Settings</string>
     <string name="bluetooth_device_name">xxx</string>
+    <string name="modeHelp">The unicycle have 3 ride modes. Each mode sets a different value of acceleration when you lean forward/backward. On Soft mode the unicycle will take more time to get up to maximum speed when compared to Madden mode.
+</string>
+    <string name="alignmentHelp">The unicycle should be calibrated to balance and keep on the upright position.\n
+To make the calibration, please execute the following steps:\n
+- Click on the button Calibrate (the unicycle will start beeping)\n
+- Turn off the power button\n
+- Place the unicycle in the upright position\n
+- Turn on the power button (if everything went correctly the unicycle will beep)\n
+- Turn off the power button\n
+</string>
 </resources>

@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingBottom="@dimen/activity_bottom_margin"
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
@@ -18,16 +18,15 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:padding="2dp"
-        android:visibility="invisible">
+        android:visibility="visible">
         <TextView
             android:id= "@+id/devicesEnable"
-            android:layout_marginTop="10dp"
             android:layout_marginBottom="10dp"
             android:paddingRight="10dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Enable Devices:"
-            android:textSize="24dp"
+            android:textSize="20dp"
             android:textColor="@color/colorText" />
         <ListView
             android:id="@+id/listDevices1"
@@ -40,7 +39,6 @@
             android:layout_alignParentRight="true"
             android:id="@+id/pbHeaderProgress"
             style="@android:style/Widget.ProgressBar.Large"
-            android:layout_marginTop="16dp"
             android:layout_marginRight="10dp"
             android:layout_width="25dp"
             android:layout_height="25dp"
@@ -55,29 +53,29 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:padding="2dp"
-        android:visibility="invisible">
-        <RelativeLayout
-            android:id = "@+id/count"
+        android:visibility="visible">
+        <ImageView
+            android:id="@+id/connectState"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:src="@drawable/ic_disconnect"
+            android:layout_alignParentRight="true"/>
+        <ProgressBar
             android:layout_alignParentRight="true"
-            android:layout_alignParentTop="true">
-            <TextView
-                android:id="@+id/showCount"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="No connection"
-                android:gravity="right"
-                android:textSize="18dp"
-                android:textColor="@color/colorText" />
-            </RelativeLayout>
+            android:id="@+id/pbHeaderProgressConnect"
+            style="@android:style/Widget.ProgressBar.Large"
+            android:layout_marginRight="10dp"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:visibility="invisible">
+        </ProgressBar>
 
         <LinearLayout
             android:id = "@+id/speedView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:layout_marginBottom="20dp"
+            android:layout_marginTop="40dp"
+            android:layout_marginBottom="10dp"
             android:layout_centerHorizontal="true">
             <ImageView
                 android:id="@+id/iconSpeed"
@@ -192,7 +190,7 @@
             android:layout_height="200dp"
             android:background="@drawable/ic_bell"
             android:layout_centerHorizontal="true"
-            android:layout_alignParentBottom="true"/>
+            android:layout_alignParentBottom="true" />
 
     </RelativeLayout>
 
@@ -208,8 +206,8 @@
             android:id = "@id/speedView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:layout_marginBottom="20dp"
+            android:layout_marginTop="40dp"
+            android:layout_marginBottom="10dp"
             android:layout_centerHorizontal="true">
             <ImageView
                 android:id="@id/iconSpeed"
@@ -592,18 +590,19 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:padding="2dp"
-        android:visibility="visible">
+        android:visibility="invisible">
         <RelativeLayout
             android:id = "@+id/modeLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingBottom="30dp"
             android:visibility="visible">
-            <ImageView
+            <ImageButton
                 android:id="@+id/detailsMode"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@drawable/ic_question"
+                android:background="#ff000000"
                 android:padding="6dp"
                 android:layout_alignParentRight="true"/>
             <TextView
@@ -611,7 +610,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:paddingBottom="8dp"
-                android:text="Mode:"
+                android:text="Ride mode"
                 android:textSize="22dp"
                 android:textColor="@color/colorText"/>
 
@@ -641,11 +640,12 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/modeLayout"
             android:visibility="visible">
-            <ImageView
+            <ImageButton
                 android:id="@+id/detailsAlignment"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@drawable/ic_question"
+                android:background="#ff000000"
                 android:padding="6dp"
                 android:layout_alignParentRight="true"/>
 
@@ -654,7 +654,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:paddingBottom="8dp"
-                android:text="Alignment:"
+                android:text="Upright calibration"
                 android:textSize="22dp"
                 android:textColor="@color/colorText"/>
 
@@ -663,7 +663,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/alignment"
-                android:text="Horizontal Calibration" />
+                android:text="Calibration" />
 
         </RelativeLayout>
     </RelativeLayout>

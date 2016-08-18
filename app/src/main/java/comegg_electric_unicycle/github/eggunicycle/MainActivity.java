@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -12,68 +13,53 @@ import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ArrayAdapter;
-import android.widget.ProgressBar;
 
 import android.content.Intent;
-import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothSocket;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.lang.String;
-import java.util.Set;
-import java.util.UUID;
-import java.util.Vector;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     private static final int NOCONNECT = 0;
     private static final int CONNECT = 1;
-
-    private BluetoothDevice device;
-    private BluetoothSocket socket;
-    public static OutputStream outputStream;
-    public static InputStream inputStream;
-    private BluetoothAdapter mBluetoothAdapter = null;
-    private static final UUID MY_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
-    public static boolean isConnected = false;
-    String dev;
+    public static BluetoothDevice device;
+    private Thread connectionThread;
+    String addressInMemory;
     //UI
     ArrayList<String> arrayList;
     ArrayAdapter<String> adapter;
     private ListView list;
-    private TextView  devicesEnable, speedView, voltageView, tripView, currentView, tempView, chargeView, chargeViewAdvanced, speedViewAdvanced, tripViewAdvanced, countView;
-    private RelativeLayout main, advanced, bluetooth, about, calibration ;
+    public static TextView  devicesEnable;
+    public static ImageView connectState;
+    public static RelativeLayout main, advanced, bluetooth, about, calibration ;
 
-    boolean stopThread;
-    Thread thread;
-    byte buffer[];
-    int bufferPosition;
-    int state=0;
-    int speed, voltage, trip, current, temperature, count;
-    double speed_, current_, voltage_, trip_, temperature_;
+    public static boolean stopThread;
+    int count;
+
     NavigationView navigationView;
 
-    public Vector<Byte> serialData = new Vector<Byte>();
-
-    EUCCommands SendEUCCommand = new EUCCommands();
+    ElectricUnicycle SendEUCCommand = new ElectricUnicycle(MainActivity.this);
+    Bluetooth Bluetooth = new Bluetooth(MainActivity.this);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,19 +77,11 @@ public class MainActivity extends AppCompatActivity
         advanced = (RelativeLayout) findViewById(R.id.advanced);
         calibration=(RelativeLayout) findViewById(R.id.calibration);
         devicesEnable=(TextView) findViewById(R.id.devicesEnable);
-        speedView = (TextView) findViewById(R.id.showSpeed);
-        voltageView = (TextView) findViewById(R.id.showVoltage);
-        tripView = (TextView) findViewById(R.id.showTrip);
-        currentView = (TextView) findViewById(R.id.showCurrent);
-        tempView = (TextView) findViewById(R.id.showTemp);
-        chargeView=(TextView) findViewById(R.id.showCharge);
-        chargeViewAdvanced = (TextView) findViewById(R.id.showChargeMore) ;
-        speedViewAdvanced = (TextView) findViewById(R.id.showSpeedMore);
-        tripViewAdvanced = (TextView) findViewById(R.id.showTripMore);
+
         list = (ListView) findViewById(R.id.listDevices1);
-        countView=(TextView) findViewById(R.id.showCount);
+        connectState=(ImageView) findViewById(R.id.connectState);
 
-
+        final AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
 
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -124,7 +102,7 @@ public class MainActivity extends AppCompatActivity
                                     long id) {
 
                 // Cancel discovery because it's costly and we're about to connect
-                mBluetoothAdapter.cancelDiscovery();
+                Bluetooth.cancelResearch();
                 runOnUiThread(new Runnable() {
                     public void run() {
                         findViewById(R.id.pbHeaderProgress).setVisibility(View.VISIBLE);
@@ -135,9 +113,7 @@ public class MainActivity extends AppCompatActivity
                 String item = ((TextView) view).getText().toString();
                 String address = item.substring(item.length() - 17);
 
-                //Toast.makeText(getBaseContext(), item, Toast.LENGTH_LONG).show();
-                device = mBluetoothAdapter.getRemoteDevice(address);
-                countView.setVisibility(View.VISIBLE);
+                device= Bluetooth.getDevice(address);
                 connectToDevice();
 
             }
@@ -155,21 +131,21 @@ public class MainActivity extends AppCompatActivity
         final Button buttonSoft = (Button) findViewById(R.id.soft);
         buttonSoft.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                SendEUCCommand.setRideMode(EUCCommands.rideModes.SOFT);
+                SendEUCCommand.setRideMode(ElectricUnicycle.rideModes.SOFT);
             }
         });
         //the action code for button confort mode
         final Button buttonComfort = (Button) findViewById(R.id.comfort);
         buttonComfort.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                SendEUCCommand.setRideMode(EUCCommands.rideModes.COMFORT);
+                SendEUCCommand.setRideMode(ElectricUnicycle.rideModes.COMFORT);
             }
         });
         //the action code for button madden mode
         final Button buttonMadden = (Button) findViewById(R.id.madden);
         buttonMadden.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                SendEUCCommand.setRideMode(EUCCommands.rideModes.MADDEN);
+                SendEUCCommand.setRideMode(ElectricUnicycle.rideModes.MADDEN);
             }
         });
 
@@ -181,32 +157,41 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
+        //the action code for help button in calibration
+        final ImageButton buttonHelpMode = (ImageButton) findViewById(R.id.detailsMode);
+        buttonHelpMode.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                builder.setMessage(R.string.modeHelp)
+                        .setTitle("Ride mode");
+                AlertDialog dialog = builder.create();
+                dialog.show();
+            }
+        });
+        //the action code for help button in calibration
+        final ImageButton buttonHelpAlignment = (ImageButton) findViewById(R.id.detailsAlignment);
+        buttonHelpAlignment.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                builder.setMessage(R.string.alignmentHelp)
+                        .setTitle("Upright calibration");
+                AlertDialog dialog = builder.create();
+                dialog.show();
+            }
+        });
+
 
     }
     protected void onStart(){
 
-
-        count =0;
         //check if in memory exist some valid address saved in the past
         SharedPreferences memoryDevice  = getSharedPreferences("MyPrefsDevice", 0);
-        String addressInMemory = memoryDevice.getString("deviceAdress", null);
+        addressInMemory = memoryDevice.getString("deviceAdress", null);
         if (!(addressInMemory == null)) {
 
             onNavigationItemSelected(navigationView.getMenu().getItem(0));
             try {
-                mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-                if (!mBluetoothAdapter.isEnabled()) {  //check if bluetooth is on
-                    Intent enableAdapter = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-                    startActivityForResult(enableAdapter, 0);
-                    try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-
-                device = mBluetoothAdapter.getRemoteDevice(addressInMemory);   //set device address
-                countView.setVisibility(View.VISIBLE);
+                Bluetooth.checkDevice();
+                device= Bluetooth.getDevice(addressInMemory);
+                count =0;
                 connectToDevice();
 
             }
@@ -227,13 +212,10 @@ public class MainActivity extends AppCompatActivity
 
     protected void onDestroy() {
         unregisterReceiver(mReceiver);
-        try {
-            inputStream.close();
-            outputStream.close();
-            socket.close();
-        } catch (IOException e1) {
-            e1.printStackTrace();
-        }
+
+        Bluetooth.closeInputStream();
+        Bluetooth.closeOutputStream();
+        Bluetooth.disconnectSocket();
 
         list.setAdapter(null);
         super.onDestroy();
@@ -244,25 +226,24 @@ public class MainActivity extends AppCompatActivity
         arrayList = new ArrayList<String>();
         adapter = new ArrayAdapter<String>(getApplicationContext(), R.layout.style_text_item, arrayList);
         list.setAdapter(adapter);
+       /* if (Bluetooth.isConnected)
+        {
+            arrayList.add(device.getName() + "\n" + device.getAddress());
 
-        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+            final View view = View.inflate(MainActivity.this, R.layout.style_text_item, null);
+            view.setBackgroundColor(Color.BLUE);
 
-        if (mBluetoothAdapter == null) {
-            Toast.makeText(getApplicationContext(), "Device doesnt Support Bluetooth", Toast.LENGTH_SHORT).show();
-        }
-        if (!mBluetoothAdapter.isEnabled()) {
-            Intent enableAdapter = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            startActivityForResult(enableAdapter, 0);
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
+            adapter.notifyDataSetChanged();
+
+        }*/
 
 
-        mBluetoothAdapter.startDiscovery();
 
+
+
+
+        Bluetooth.checkDevice();
+        Bluetooth.startResearch();
         IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
         registerReceiver(mReceiver, filter);
 
@@ -270,93 +251,63 @@ public class MainActivity extends AppCompatActivity
 
     public void disconnectButtonClick()
     {
-        try {
-            inputStream.close();
-            outputStream.close();
-            socket.close();
-        } catch (IOException e1) {
-            e1.printStackTrace();
-        }
+
+        Bluetooth.closeInputStream();
+        Bluetooth.closeOutputStream();
+        Bluetooth.disconnectSocket();
+
 
         list.setAdapter(null);
 
     }
 
     private void connectToDevice(){
-       Thread backgroundThread = new Thread() {
+
+        this.runOnUiThread(new Runnable() {
+            public void run() {
+                connectState.setVisibility(View.INVISIBLE);
+                findViewById(R.id.pbHeaderProgressConnect).setVisibility(View.VISIBLE);
+            }
+        });
+       connectionThread = new Thread() {
            @Override
            public void run() {
-
-               count++;
-               runOnUiThread(new Runnable() {
-                   public void run() {
-                       countView.setText("Try to connect: " + count + " times");
-                   }
-               });
-
-               BluetoothSocket tmp = null;
-               isConnected = true;
-
-               try {
-                   tmp = device.createRfcommSocketToServiceRecord(MY_UUID);
-               } catch (IOException e) {
-                   e.printStackTrace();
-               }
-               socket = tmp;
-
-               try {
-                   // This is a blocking call and will only return on a
-                   // successful connection or an exception
-                   socket.connect();
-               } catch (IOException e) {
-                   //connection to device failed so close the socket
-
-                   try {
-                       isConnected = false;
-                       socket.close();
-
-                   } catch (IOException e2) {
-                       e2.printStackTrace();
-                   }
-               }
+               while(!Thread.currentThread().isInterrupted()) {
+                   count++;
 
 
-               if (isConnected) {
-                   try {
-                       inputStream = socket.getInputStream();
-                   } catch (IOException e) {
+                   Bluetooth.connectSocket();
+
+                   if (Bluetooth.isConnected) {
                        runOnUiThread(new Runnable() {
                            public void run() {
-                               Toast.makeText(getBaseContext(), "Failed: socket.getInputStream();", Toast.LENGTH_LONG).show();
+                               connectState.setVisibility(View.VISIBLE);
+                               findViewById(R.id.pbHeaderProgressConnect).setVisibility(View.INVISIBLE);
+                               connectState.setImageResource(R.drawable.ic_connect);
                            }
                        });
+
+
+                       connectionThread.interrupt();
+
+                       // finished thread
+                       Message msg = Message.obtain();
+                       msg.what = CONNECT;
+                       handler.sendMessage(msg);
+
+
+                   } else {
+                       // finished thread
+
+                       Message msg = Message.obtain();
+                       msg.what = NOCONNECT;
+                       handler.sendMessage(msg);
                    }
-
-                   try {
-                       outputStream=socket.getOutputStream();
-                   } catch (IOException e) {
-                       runOnUiThread(new Runnable() {
-                           public void run() {
-                               Toast.makeText(getBaseContext(), "Failed: socket.getOutputStream();", Toast.LENGTH_LONG).show();
-                           }
-                       });
-                   }
-
-                   // finished thread
-                   Message msg = Message.obtain();
-                   msg.what = CONNECT;
-                   handler.sendMessage(msg);
-
-               } else {
-                   // finished thread
-                   Message msg = Message.obtain();
-                   msg.what = NOCONNECT;
-                   handler.sendMessage(msg);
                }
            }
        };
 
-        backgroundThread.start();
+       connectionThread.start();
 
     }
 
@@ -365,7 +316,8 @@ public class MainActivity extends AppCompatActivity
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case CONNECT:
-                    countView.setVisibility(View.INVISIBLE);
+
+                    //countView.setVisibility(View.INVISIBLE);
                     //connection to device with sucess. Address of device is saved in SharedPreferences
                     SharedPreferences memoryDevice = getSharedPreferences("MyPrefsDevice", 0);
                     SharedPreferences.Editor editor = memoryDevice.edit();
@@ -374,9 +326,10 @@ public class MainActivity extends AppCompatActivity
 
                     //start data listening
                     beginListenForData();
+
                     break;
                 case NOCONNECT:
-                    connectToDevice();
+                    //connectToDevice();
                     break;
             }
         }
@@ -394,6 +347,15 @@ public class MainActivity extends AppCompatActivity
             about.setVisibility(View.INVISIBLE);
             advanced.setVisibility(View.INVISIBLE);
             calibration.setVisibility(View.INVISIBLE);
+            getSupportActionBar().setTitle("Home");
+            findViewById(R.id.pbHeaderProgressConnect).setVisibility(View.INVISIBLE);
+            connectState.setVisibility(View.VISIBLE);
+            if (Bluetooth.isConnected) {
+                connectState.setImageResource(R.drawable.ic_connect);
+            }
+            else{
+                connectState.setImageResource(R.drawable.ic_disconnect);
+            }
 
         }
         if (id == R.id.ic_menu_advanced){
@@ -402,6 +364,7 @@ public class MainActivity extends AppCompatActivity
             about.setVisibility(View.INVISIBLE);
             advanced.setVisibility(View.VISIBLE);
             calibration.setVisibility(View.INVISIBLE);
+            getSupportActionBar().setTitle("Advanced");
 
         }
 
@@ -411,6 +374,7 @@ public class MainActivity extends AppCompatActivity
             about.setVisibility(View.INVISIBLE);
             advanced.setVisibility(View.INVISIBLE);
             calibration.setVisibility(View.INVISIBLE);
+            getSupportActionBar().setTitle("Connect Unicycle");
             showEnableDevices();
         }
 
@@ -421,6 +385,7 @@ public class MainActivity extends AppCompatActivity
             about.setVisibility(View.INVISIBLE);
             advanced.setVisibility(View.INVISIBLE);
             calibration.setVisibility(View.VISIBLE);
+            getSupportActionBar().setTitle("Calibration");
 
         }
 
@@ -430,6 +395,7 @@ public class MainActivity extends AppCompatActivity
             about.setVisibility(View.VISIBLE);
             advanced.setVisibility(View.INVISIBLE);
             calibration.setVisibility(View.INVISIBLE);
+            getSupportActionBar().setTitle("About");
 
         }
 
@@ -442,267 +408,13 @@ public class MainActivity extends AppCompatActivity
     void beginListenForData()
     {
         runOnUiThread(new Runnable() {
-
-            @Override
             public void run() {
                 onNavigationItemSelected(navigationView.getMenu().getItem(0));}});
-       // final Handler handler = new Handler();
-        stopThread = false;
-        buffer = new byte[1024];
-        Thread thread  = new Thread(new Runnable()
-        {
-            public void run()
-            {
-                while(!Thread.currentThread().isInterrupted() && !stopThread)
-                {
-                    try
-                    {
-                        int byteCount = inputStream.available();
-                        if(byteCount > 0)
-                        {
-                            final byte[] rawBytes = new byte[byteCount];
-                            inputStream.read(rawBytes);
 
-                            // store all received bytes on vector
-                            for (int i = 0; i < byteCount; ) {
-                                serialData.add(rawBytes[i]);
-                                i++;
-                            }
-                        }
-
-                        processData();
-                    }
-                    catch (IOException ex)
-                    {
-                        stopThread = true;
-                    }
-                }
-            }
-        });
-
-        thread.start();
+        Bluetooth.readData();
     }
 
-public void processData() {
 
-    while  (!serialData.isEmpty())
-    {
-        Byte data1 = serialData.get(0);
-        int data = (int) data1;
-        serialData.removeElementAt(0);
-        if (data < 0) data += 256;
-
-        switch (state) {
-
-            // start by looking for the START sequence of bytes: 0x18 0x5a 0x5a 0x5a 0x5a 0x55 0xaa
-            case 0:
-                if (data == 24) {
-                    state++;
-                } else state = 0;
-                break;
-
-            case 1:
-                if (data == 90) {
-                    state++;
-                } else state = 0;
-                break;
-
-            case 2:
-                if (data == 90) {
-                    state++;
-                } else state = 0;
-                break;
-
-            case 3:
-                if (data == 90) {
-                    state++;
-                } else state = 0;
-                break;
-
-            case 4:
-                if (data == 90) {
-                    state++;
-                } else state = 0;
-                break;
-
-            case 5:
-                if (data == 85) {
-                    state++;
-                } else state = 0;
-                break;
-
-            case 6:
-                if (data == 170) {
-                    state++;
-                } else state = 0;
-                break;
-
-            // next 2 bytes are voltage
-            case 7:
-                state++;
-                voltage = (data<<8);
-                break;
-
-            case 8:
-                state++;
-                voltage|= data;
-                voltage_ = voltage/100;
-                break;
-
-            // next 2 bytes are speed
-            case 9:
-                state++;
-                speed = (data << 8);
-                break;
-
-            case 10:
-                state++;
-                speed |= data;
-                if (speed>(65536/2))
-                    speed= speed-65536;
-                if (speed<0)
-                    speed= speed*(-1); // necessary to set positive value of speed
-                speed_=speed*0.036;
-                break;
-
-            // next 4 bytes are trip distance
-            case 11:
-                state++;
-                trip = (data<< 24);
-                break;
-
-            case 12:
-                state++;
-                trip |= (data<< 16);
-                break;
-
-            case 13:
-                state++;
-                trip |= (data<< 8);
-                break;
-
-            case 14:
-                state++;
-                trip |= data;
-                trip_ = trip/1000.0;
-                break;
-
-            // next 2 bytes are current
-            case 15:
-                state++;
-                current = (data << 8);
-                break;
-
-            case 16:
-                state++;
-                current |= data;
-                if (current>(65536/2))
-                    current= current-65536;
-                current_ = (current / 100.000);
-                break;
-
-            // next 2 bytes are temperature
-            case 17:
-                state++;
-                temperature= (data<<8);
-                break;
-
-            case 18:
-                state++;
-                temperature|= data;
-
-                if (temperature>(65536/2))
-                    temperature=temperature-65536;
-                temperature_ = (temperature/340.0)+36.53;
-                break;
-
-            case 19:
-                if (data == 0) {
-                    state++;
-                } else state = 0;
-                break;
-
-            case 20:
-                state++; // I have seen data to equal 0, 1 and 2. In one 30B4 board,
-                // this value is always 0 while on the other can be 1 or 2 at least.
-                break;
-
-            case 21:
-                if (data == 255) {
-                    state++;
-                } else state = 0;
-                break;
-
-            case 22:
-                if (data == 248) {
-                    state++;
-                } else state = 0;
-                break;
-
-            case 23:
-                if (data == 0) {
-                    state = 0;
-                    runOnUiThread(new Runnable() {
-
-                        @Override
-                        public void run() {
-
-                            if (main.getVisibility()== View.VISIBLE) {
-                                speedView.setText(String.format("%2.1f", speed_));
-                                chargeView.setText(Integer.toString(calcChargePercent(voltage_)));
-                                tripView.setText(String.format("%2.2f",trip_));
-                            }
-
-                            else {
-
-                                speedViewAdvanced.setText(String.format("%2.1f", speed_));
-                                voltageView.setText(String.format("%2.1f", voltage_));
-                                tripViewAdvanced.setText(String.format("%2.2f", trip_));
-                                currentView.setText(String.format("%2.2f", current_));
-                                tempView.setText(String.format("%2.1f", temperature_));
-                                chargeViewAdvanced.setText(Integer.toString(calcChargePercent(voltage_)));
-                            }
-
-                        }
-                    });
-                } else state = 0;
-                break;
-
-            default:
-                state = 0;
-                break;
-        }
-    }
-
-}
-    public int calcChargePercent(double v)
-    {
-        int percent=0;
-        if (v>=0 && v<52.1)
-            percent= 0;
-        if (v>=52.1 && v<53.1)
-            percent=10;
-        if (v>=53.1 && v< 54.2)
-            percent=20;
-        if (v>=54.2 && v< 56.4)
-            percent=30;
-        if (v>=56.4 && v<57.9)
-            percent = 40;
-        if (v>=57.9 && v< 59.3)
-            percent=50;
-        if (v>=59.3 && v<60.7)
-            percent=60;
-        if (v>=60.7 && v<61.9)
-            percent=70;
-        if (v>=61.9 && v<63.6)
-            percent=80;
-        if (v>=63.6 && v<65.0)
-            percent= 90;
-         if (v>=65.0)
-            percent=100;
-
-        return percent;
-    }
 
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
@@ -715,14 +427,13 @@ public void processData() {
                 adapter.notifyDataSetChanged();
 
             }
-            else if (BluetoothDevice.ACTION_ACL_DISCONNECTED.equals(action)) {
 
-            }
             if (arrayList.isEmpty()) {
                 Toast.makeText(getBaseContext(), "No devices found", Toast.LENGTH_LONG).show();
             }
 
         }
+
     };
 
 }
