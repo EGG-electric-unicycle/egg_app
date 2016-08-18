@@ -18,20 +18,18 @@ public class ElectricUnicycle {
     public static int speed=0, voltage=0, trip=0,current=0, temperature=0;
     public enum rideModes {SOFT, COMFORT, MADDEN};
     public static TextView speedView, voltageView ,tripView ,currentView ,tempView ,chargeView, chargeViewAdvanced,speedViewAdvanced ,tripViewAdvanced;
-
-
+    
     public ElectricUnicycle(Activity mainActivity) { //constructor
         super();
         this.myMainActivity=mainActivity;
-
     }
 
     public void SendCommand(int _byte) {
         Bluetooth.writeByte((byte) _byte);
     }
 
-    public void EUCCommandDelay() {
-        // make a small delay between each command
+    // make a small delay between each command
+    public void CommandDelay() {
         try {
             Thread.sleep(500);
         } catch(InterruptedException ex) {
@@ -45,38 +43,28 @@ public class ElectricUnicycle {
 
     public void setRideMode(rideModes rideMode) {
         if (rideMode == rideModes.SOFT) {
-            SendCommand('s');
-            EUCCommandDelay();
+            SendCommand('s'); CommandDelay();
             SendCommand('b');
         } else if (rideMode == rideModes.COMFORT) {
-            SendCommand('f');
-            EUCCommandDelay();
+            SendCommand('f'); CommandDelay();
             SendCommand('b');
         } else if (rideMode == rideModes.MADDEN) {
-            SendCommand('h');
-            EUCCommandDelay();
+            SendCommand('h'); CommandDelay();
             SendCommand('b');
         }
     }
 
     public void setHorizontalCalibration() {
-        SendCommand(',');
-        EUCCommandDelay();
-        SendCommand('c');
-        EUCCommandDelay();
-        SendCommand('y');
-        EUCCommandDelay();
-        SendCommand('c');
-        EUCCommandDelay();
-        SendCommand('y');
-        EUCCommandDelay();
-        SendCommand('c');
-        EUCCommandDelay();
+        SendCommand(','); CommandDelay();
+        SendCommand('c'); CommandDelay();
+        SendCommand('y'); CommandDelay();
+        SendCommand('c'); CommandDelay();
+        SendCommand('y'); CommandDelay();
+        SendCommand('c'); CommandDelay();
         SendCommand('y');
     }
 
     public static void processData(Vector<Byte> dataVector) {
-
         speedView=  (TextView) myMainActivity.findViewById(R.id.showSpeed);
         voltageView = (TextView) myMainActivity.findViewById(R.id.showVoltage);
         tripView = (TextView) myMainActivity.findViewById(R.id.showTrip);
@@ -92,10 +80,9 @@ public class ElectricUnicycle {
             Byte data1 = dataVector.get(0);
             int data = (int) data1;
             dataVector.removeElementAt(0);
-            if (data < 0) data += 256;
+            if (data < 0) data += 256; // need to convert data from "int" to "byte" type
 
             switch (state) {
-
                 // start by looking for the START sequence of bytes: 0x18 0x5a 0x5a 0x5a 0x5a 0x55 0xaa
                 case 0:
                     if (data == 24) {
@@ -142,7 +129,7 @@ public class ElectricUnicycle {
                 // next 2 bytes are voltage
                 case 7:
                     state++;
-                    voltage = (data<<8);
+                    voltage = (data <<8);
                     break;
 
                 case 8:
@@ -160,27 +147,27 @@ public class ElectricUnicycle {
                 case 10:
                     state++;
                     speed |= data;
-                    if (speed>(65536/2))
-                        speed= speed-65536;
-                    if (speed<0)
-                        speed= speed*(-1); // necessary to set positive value of speed
-                    speed_=speed*0.036;
+                    if (speed > (65536/2)) // convert data from "int" to "unsigned int"
+                        speed = speed - 65536;
+                    if (speed < 0)
+                        speed= speed * (-1); // necessary to set positive value of speed when it is negative
+                    speed_ = speed * 0.036;
                     break;
 
                 // next 4 bytes are trip distance
                 case 11:
                     state++;
-                    trip = (data<< 24);
+                    trip = (data << 24);
                     break;
 
                 case 12:
                     state++;
-                    trip |= (data<< 16);
+                    trip |= (data << 16);
                     break;
 
                 case 13:
                     state++;
-                    trip |= (data<< 8);
+                    trip |= (data << 8);
                     break;
 
                 case 14:
@@ -189,7 +176,7 @@ public class ElectricUnicycle {
                     trip_ = trip/1000.0;
                     break;
 
-                // next 2 bytes are current
+                // next 2 bytes are good current
                 case 15:
                     state++;
                     current = (data << 8);
@@ -198,8 +185,8 @@ public class ElectricUnicycle {
                 case 16:
                     state++;
                     current |= data;
-                    if (current>(65536/2))
-                        current= current-65536;
+                    if (current > (65536 / 2))  // convert data from "int" to "unsigned int"
+                        current = current - 65536;
                     current_ = (current / 100.000);
                     break;
 
@@ -213,22 +200,25 @@ public class ElectricUnicycle {
                     state++;
                     temperature|= data;
 
-                    if (temperature>(65536/2))
-                        temperature=temperature-65536;
-                    temperature_ = (temperature/340.0)+36.53;
+                    if (temperature > (65536 / 2))  // convert data from "int" to "unsigned int"
+                        temperature = temperature - 65536;
+                    temperature_ = (temperature/340.0) + 36.53;
                     break;
 
+                // unknown
                 case 19:
                     if (data == 0) {
                         state++;
                     } else state = 0;
                     break;
 
+                // unknown
                 case 20:
                     state++; // I have seen data to equal 0, 1 and 2. In one 30B4 board,
                     // this value is always 0 while on the other can be 1 or 2 at least.
                     break;
 
+                // END sequence
                 case 21:
                     if (data == 255) {
                         state++;
@@ -243,6 +233,7 @@ public class ElectricUnicycle {
 
                 case 23:
                     if (data == 0) {
+                        // here we consider that we got a complete data sequence so we can process it
                         state = 0;
                         myMainActivity.runOnUiThread(new Runnable() {
 
@@ -277,32 +268,22 @@ public class ElectricUnicycle {
         }
 
     }
+
+    // returns the battery charge state
     public static int calcChargePercent(double v)
     {
-        int percent=0;
-        if (v>=0 && v<52.1)
-            percent= 0;
-        if (v>=52.1 && v<53.1)
-            percent=10;
-        if (v>=53.1 && v< 54.2)
-            percent=20;
-        if (v>=54.2 && v< 56.4)
-            percent=30;
-        if (v>=56.4 && v<57.9)
-            percent = 40;
-        if (v>=57.9 && v< 59.3)
-            percent=50;
-        if (v>=59.3 && v<60.7)
-            percent=60;
-        if (v>=60.7 && v<61.9)
-            percent=70;
-        if (v>=61.9 && v<63.6)
-            percent=80;
-        if (v>=63.6 && v<65.0)
-            percent= 90;
-        if (v>=65.0)
-            percent=100;
+        if (v>=0 && v<52.1)     return 0;
+        if (v>=52.1 && v<53.1)  return 10;
+        if (v>=53.1 && v< 54.2) return 20;
+        if (v>=54.2 && v< 56.4) return 30;
+        if (v>=56.4 && v<57.9)  return 40;
+        if (v>=57.9 && v< 59.3) return 50;
+        if (v>=59.3 && v<60.7)  return 60;
+        if (v>=60.7 && v<61.9)  return 70;
+        if (v>=61.9 && v<63.6)  return 80;
+        if (v>=63.6 && v<65.0)  return 90;
+        if (v>=65.0)            return 100;
 
-        return percent;
+        return 0; // should not get here
     }
 }
