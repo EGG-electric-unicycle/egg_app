@@ -82,7 +82,7 @@ public class Bluetooth {
 
     public void connectSocket(){
         BluetoothSocket tmp = null;
-        isConnected = true;
+
 
         try {
             tmp = MainActivity.device.createRfcommSocketToServiceRecord(MY_UUID);
@@ -95,6 +95,7 @@ public class Bluetooth {
             // This is a blocking call and will only return on a
             // successful connection or an exception
             socket.connect();
+            isConnected = true;
         } catch (IOException e) {
             //connection to device failed so close the socket
             disconnectSocket();

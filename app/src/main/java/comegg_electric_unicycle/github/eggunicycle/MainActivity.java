@@ -50,8 +50,9 @@ public class MainActivity extends AppCompatActivity
     ArrayAdapter<String> adapter;
     private ListView list;
     public static TextView  devicesEnable;
+    public static TextView text22;
     public static ImageView connectState;
-    public static RelativeLayout main, advanced, bluetooth, about, calibration ;
+    public static RelativeLayout main, advanced, bluetooth, about, calibration;
 
     public static boolean stopThread;
     int count;
@@ -83,7 +84,6 @@ public class MainActivity extends AppCompatActivity
 
         final AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
 
-
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
 
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -100,6 +100,11 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position,
                                     long id) {
+                if (Bluetooth.isConnected) { // if a device is connected is necessary clean all dependencies
+                    Bluetooth.closeInputStream();
+                    Bluetooth.closeOutputStream();
+                    Bluetooth.disconnectSocket();
+                }
 
                 // Cancel discovery because it's costly and we're about to connect
                 Bluetooth.cancelResearch();
@@ -226,40 +231,28 @@ public class MainActivity extends AppCompatActivity
         arrayList = new ArrayList<String>();
         adapter = new ArrayAdapter<String>(getApplicationContext(), R.layout.style_text_item, arrayList);
         list.setAdapter(adapter);
-       /* if (Bluetooth.isConnected)
+        if (Bluetooth.isConnected)  //show information to user (name and address of device connected)
         {
-            arrayList.add(device.getName() + "\n" + device.getAddress());
-
-            final View view = View.inflate(MainActivity.this, R.layout.style_text_item, null);
-            view.setBackgroundColor(Color.BLUE);
-
-            adapter.notifyDataSetChanged();
-
-        }*/
-
-
-
-
+            findViewById(R.id.connectedWith).setVisibility(View.VISIBLE);
+            TextView textName = (TextView)findViewById(R.id.withName);
+            textName.setText(device.getName());
+            TextView textAddress = (TextView)findViewById(R.id.withAddress);
+            textAddress.setText(device.getAddress());
+        }
+        else {
+            findViewById(R.id.connectedWith).setVisibility(View.GONE);
+        }
 
 
         Bluetooth.checkDevice();
         Bluetooth.startResearch();
+
         IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
         registerReceiver(mReceiver, filter);
 
     }
 
-    public void disconnectButtonClick()
-    {
 
-        Bluetooth.closeInputStream();
-        Bluetooth.closeOutputStream();
-        Bluetooth.disconnectSocket();
-
-
-        list.setAdapter(null);
-
-    }
 
     private void connectToDevice(){
 
@@ -427,6 +420,7 @@ public class MainActivity extends AppCompatActivity
                 adapter.notifyDataSetChanged();
 
             }
+
 
             if (arrayList.isEmpty()) {
                 Toast.makeText(getBaseContext(), "No devices found", Toast.LENGTH_LONG).show();

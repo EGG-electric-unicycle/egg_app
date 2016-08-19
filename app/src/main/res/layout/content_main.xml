@@ -19,14 +19,60 @@
         android:layout_height="match_parent"
         android:padding="2dp"
         android:visibility="visible">
+        <RelativeLayout
+            android:id = "@+id/connectedWith"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="2dp"
+            android:visibility="gone">
+            <TextView
+                android:id= "@+id/connected"
+                android:layout_marginBottom="5dp"
+                android:paddingRight="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Connected With:"
+                android:textSize="18dp"
+                android:textColor="@color/colorText"/>
+            <TextView
+                android:id= "@+id/withName"
+                android:layout_marginBottom="5dp"
+                android:paddingRight="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/connected"
+                android:text="xxx"
+                android:textSize="16dp"
+                android:textColor="@color/colorText"/>
+            <TextView
+                android:id= "@+id/withAddress"
+                android:layout_marginBottom="20dp"
+                android:paddingRight="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/withName"
+                android:text="yyy"
+                android:textSize="16dp"
+                android:textColor="@color/colorText"/>
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id = "@+id/enableDevices"
+            android:layout_below="@id/connectedWith"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="2dp"
+            android:visibility="visible">
+
         <TextView
             android:id= "@+id/devicesEnable"
-            android:layout_marginBottom="10dp"
+            android:layout_marginBottom="5dp"
             android:paddingRight="10dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Enable Devices:"
-            android:textSize="20dp"
+            android:textSize="18dp"
             android:textColor="@color/colorText" />
         <ListView
             android:id="@+id/listDevices1"
@@ -44,7 +90,7 @@
             android:layout_height="25dp"
             android:visibility="visible">
         </ProgressBar>
-
+        </RelativeLayout>
     </RelativeLayout>
 
 
@@ -53,7 +99,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:padding="2dp"
-        android:visibility="visible">
+        android:visibility="invisible">
         <ImageView
             android:id="@+id/connectState"
             android:layout_width="wrap_content"
