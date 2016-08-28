@@ -5,7 +5,10 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -17,6 +20,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -90,10 +94,12 @@ public class MainActivity extends AppCompatActivity
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.setDrawerListener(toggle);
         toggle.syncState();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            this.getWindow().setStatusBarColor(Color.BLACK);
+        }
 
         navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-
 
         //listener to show item click in list of enable devices found
         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -126,61 +132,188 @@ public class MainActivity extends AppCompatActivity
 
         // the action code for button beep
         final Button buttonBeep = (Button) findViewById(R.id.buttonBeep);
-        buttonBeep.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                SendEUCCommand.beep();
+        buttonBeep.setOnTouchListener(new View.OnTouchListener() {
+
+            public boolean onTouch(View v, MotionEvent event) {
+
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN: {
+                        buttonBeep.getBackground().setColorFilter(getResources().getColor(R.color.colorIconPressed), PorterDuff.Mode.SRC_ATOP);
+                        buttonBeep.invalidate();
+                        break;
+                    }
+                    case MotionEvent.ACTION_UP: {
+                        buttonBeep.getBackground().setColorFilter(getResources().getColor(R.color.colorIcon), PorterDuff.Mode.SRC_ATOP);
+                        SendEUCCommand.beep();
+                        buttonBeep.invalidate();
+                        break;
+                    }
+                }
+                return true;
             }
+            /*public void onClick(View v) {
+               SendEUCCommand.beep();
+            }*/
         });
 
         //the action code for button soft mode
         final Button buttonSoft = (Button) findViewById(R.id.soft);
-        buttonSoft.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                SendEUCCommand.setRideMode(ElectricUnicycle.rideModes.SOFT);
+        buttonSoft.setOnTouchListener(new View.OnTouchListener() {
+
+            public boolean onTouch(View v, MotionEvent event) {
+
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN: {
+                        buttonSoft.getBackground().setColorFilter(getResources().getColor(R.color.colorIconPressed), PorterDuff.Mode.SRC_ATOP);
+                        buttonSoft.invalidate();
+                        break;
+                    }
+                    case MotionEvent.ACTION_UP: {
+                        buttonSoft.getBackground().setColorFilter(getResources().getColor(R.color.colorIcon), PorterDuff.Mode.SRC_ATOP);
+                        SendEUCCommand.setRideMode(ElectricUnicycle.rideModes.SOFT);
+                        buttonSoft.invalidate();
+                        break;
+                    }
+                }
+                return true;
             }
+            /*public void onClick(View v) {
+               SendEUCCommand.beep();
+            }*/
         });
         //the action code for button confort mode
         final Button buttonComfort = (Button) findViewById(R.id.comfort);
-        buttonComfort.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                SendEUCCommand.setRideMode(ElectricUnicycle.rideModes.COMFORT);
+        buttonComfort.setOnTouchListener(new View.OnTouchListener() {
+
+            public boolean onTouch(View v, MotionEvent event) {
+
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN: {
+                        buttonComfort.getBackground().setColorFilter(getResources().getColor(R.color.colorIconPressed), PorterDuff.Mode.SRC_ATOP);
+                        buttonComfort.invalidate();
+                        break;
+                    }
+                    case MotionEvent.ACTION_UP: {
+                        buttonComfort.getBackground().setColorFilter(getResources().getColor(R.color.colorIcon), PorterDuff.Mode.SRC_ATOP);
+                        SendEUCCommand.setRideMode(ElectricUnicycle.rideModes.COMFORT);
+                        buttonComfort.invalidate();
+                        break;
+                    }
+                }
+                return true;
             }
+            /*public void onClick(View v) {
+               SendEUCCommand.beep();
+            }*/
         });
         //the action code for button madden mode
         final Button buttonMadden = (Button) findViewById(R.id.madden);
-        buttonMadden.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                SendEUCCommand.setRideMode(ElectricUnicycle.rideModes.MADDEN);
-            }
-        });
+        buttonMadden.setOnTouchListener(new View.OnTouchListener() {
 
+            public boolean onTouch(View v, MotionEvent event) {
+
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN: {
+                        buttonMadden.getBackground().setColorFilter(getResources().getColor(R.color.colorIconPressed), PorterDuff.Mode.SRC_ATOP);
+                        buttonMadden.invalidate();
+                        break;
+                    }
+                    case MotionEvent.ACTION_UP: {
+                        buttonMadden.getBackground().setColorFilter(getResources().getColor(R.color.colorIcon), PorterDuff.Mode.SRC_ATOP);
+                        SendEUCCommand.setRideMode(ElectricUnicycle.rideModes.MADDEN);
+                        buttonMadden.invalidate();
+                        break;
+                    }
+                }
+                return true;
+            }
+            /*public void onClick(View v) {
+               SendEUCCommand.beep();
+            }*/
+        });
         //the action code for button horizontal calibration
         final Button buttonCalibration = (Button) findViewById(R.id.horizontalCalib);
-        buttonCalibration.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-               SendEUCCommand.setHorizontalCalibration();
+        buttonCalibration.setOnTouchListener(new View.OnTouchListener() {
+
+            public boolean onTouch(View v, MotionEvent event) {
+
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN: {
+                        buttonCalibration.getBackground().setColorFilter(getResources().getColor(R.color.colorIconPressed), PorterDuff.Mode.SRC_ATOP);
+                        buttonCalibration.invalidate();
+                        break;
+                    }
+                    case MotionEvent.ACTION_UP: {
+                        buttonCalibration.getBackground().setColorFilter(getResources().getColor(R.color.colorIcon), PorterDuff.Mode.SRC_ATOP);
+                        SendEUCCommand.setHorizontalCalibration();
+                        buttonCalibration.invalidate();
+                        break;
+                    }
+                }
+                return true;
             }
+            /*public void onClick(View v) {
+               SendEUCCommand.beep();
+            }*/
         });
+
 
         //the action code for help button in calibration
         final ImageButton buttonHelpMode = (ImageButton) findViewById(R.id.detailsMode);
-        buttonHelpMode.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                builder.setMessage(R.string.modeHelp)
-                        .setTitle("Ride mode");
-                AlertDialog dialog = builder.create();
-                dialog.show();
+        buttonHelpMode.setOnTouchListener(new View.OnTouchListener() {
+
+            public boolean onTouch(View v, MotionEvent event) {
+
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN: {
+                        buttonHelpMode.getDrawable().setColorFilter(getResources().getColor(R.color.colorIconPressed), PorterDuff.Mode.SRC_ATOP);
+                        buttonHelpMode.invalidate();
+                        break;
+                    }
+                    case MotionEvent.ACTION_UP: {
+                        buttonHelpMode.getDrawable().setColorFilter(getResources().getColor(R.color.colorIcon), PorterDuff.Mode.SRC_ATOP);
+                        builder.setMessage(R.string.modeHelp)
+                                .setTitle("Ride mode");
+                        AlertDialog dialog = builder.create();
+                        dialog.show();
+                        buttonHelpMode.invalidate();
+                        break;
+                    }
+                }
+                return true;
             }
+            /*public void onClick(View v) {
+               SendEUCCommand.beep();
+            }*/
         });
+
         //the action code for help button in calibration
         final ImageButton buttonHelpAlignment = (ImageButton) findViewById(R.id.detailsAlignment);
-        buttonHelpAlignment.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                builder.setMessage(R.string.alignmentHelp)
-                        .setTitle("Upright calibration");
-                AlertDialog dialog = builder.create();
-                dialog.show();
+        buttonHelpAlignment.setOnTouchListener(new View.OnTouchListener() {
+
+            public boolean onTouch(View v, MotionEvent event) {
+
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN: {
+                        buttonHelpAlignment.getDrawable().setColorFilter(getResources().getColor(R.color.colorIconPressed), PorterDuff.Mode.SRC_ATOP);
+                        buttonHelpAlignment.invalidate();
+                        break;
+                    }
+                    case MotionEvent.ACTION_UP: {
+                        buttonHelpAlignment.getDrawable().setColorFilter(getResources().getColor(R.color.colorIcon), PorterDuff.Mode.SRC_ATOP);
+                        builder.setMessage(R.string.alignmentHelp)
+                                .setTitle("Upright calibration");
+                        AlertDialog dialog = builder.create();
+                        dialog.show();
+                        buttonHelpAlignment.invalidate();
+                        break;
+                    }
+                }
+                return true;
             }
+            /*public void onClick(View v) {
+               SendEUCCommand.beep();
+            }*/
         });
 
 
@@ -262,7 +395,7 @@ public class MainActivity extends AppCompatActivity
                 findViewById(R.id.pbHeaderProgressConnect).setVisibility(View.VISIBLE);
             }
         });
-       connectionThread = new Thread() {
+       this.connectionThread = new Thread() {
            @Override
            public void run() {
                while(!Thread.currentThread().isInterrupted()) {
@@ -281,6 +414,8 @@ public class MainActivity extends AppCompatActivity
                        });
 
 
+                       IntentFilter filter2 = new IntentFilter(BluetoothDevice.ACTION_ACL_DISCONNECTED);
+                       registerReceiver(mReceiver, filter2);
                        connectionThread.interrupt();
 
                        // finished thread
@@ -419,6 +554,15 @@ public class MainActivity extends AppCompatActivity
                 arrayList.add(deviceFound.getName() + "\n" + deviceFound.getAddress());
                 adapter.notifyDataSetChanged();
 
+            }
+            if (BluetoothDevice.ACTION_ACL_DISCONNECTED.equals(action)){
+                connectionThread.interrupt();
+
+                connectionThread = null;
+
+                Bluetooth.checkDevice();
+               // device= Bluetooth.getDevice(addressInMemory);
+                connectToDevice();
             }
 
 
