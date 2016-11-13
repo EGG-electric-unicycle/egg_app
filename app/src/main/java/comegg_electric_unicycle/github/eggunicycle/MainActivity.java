@@ -368,7 +368,7 @@ public class MainActivity extends AppCompatActivity
         });
 
 
-        //the action code for help button in calibration
+        //the action code for help button in settings
         final ImageButton buttonHelpMode = (ImageButton) findViewById(R.id.detailsMode);
         buttonHelpMode.setOnTouchListener(new View.OnTouchListener() {
 
@@ -397,7 +397,7 @@ public class MainActivity extends AppCompatActivity
             }*/
         });
 
-        //the action code for help button in calibration
+        //the action code for help button in settings
         final ImageButton buttonHelpAlignment = (ImageButton) findViewById(R.id.detailsAlignment);
         buttonHelpAlignment.setOnTouchListener(new View.OnTouchListener() {
 
@@ -416,6 +416,35 @@ public class MainActivity extends AppCompatActivity
                         AlertDialog dialog = builder.create();
                         dialog.show();
                         buttonHelpAlignment.invalidate();
+                        break;
+                    }
+                }
+                return true;
+            }
+            /*public void onClick(View v) {
+               SendEUCCommand.beep();
+            }*/
+        });
+
+        //the action code for help button in settings
+        final ImageButton buttonHelpAlert = (ImageButton) findViewById(R.id.detailsAlert);
+        buttonHelpAlert.setOnTouchListener(new View.OnTouchListener() {
+
+            public boolean onTouch(View v, MotionEvent event) {
+
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN: {
+                        buttonHelpAlert.getDrawable().setColorFilter(getResources().getColor(R.color.colorIconPressed), PorterDuff.Mode.SRC_ATOP);
+                        buttonHelpAlert.invalidate();
+                        break;
+                    }
+                    case MotionEvent.ACTION_UP: {
+                        buttonHelpAlert.getDrawable().setColorFilter(getResources().getColor(R.color.colorIcon), PorterDuff.Mode.SRC_ATOP);
+                        builder.setMessage(R.string.alertHelp)
+                                .setTitle("Alert");
+                        AlertDialog dialog = builder.create();
+                        dialog.show();
+                        buttonHelpAlert.invalidate();
                         break;
                     }
                 }

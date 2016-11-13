@@ -269,14 +269,14 @@ public class ElectricUnicycle {
             int intSpeed = (int)speed_;
             int intTemp = (int)temperature_;
             if (MainActivity.preferenceValue!= null && MainActivity.selection!= null) {
-                long[] pattern = {0, 100, 100, 200};
-                if (MainActivity.selection.equals("Velocity") && intSpeed > Integer.parseInt(MainActivity.preferenceValue)) {
+                long[] pattern = {0, 100, 0, 200};
+                if (MainActivity.selection.equals("Velocity") && intSpeed >= Integer.parseInt(MainActivity.preferenceValue)) {
                     Vibrator v = (Vibrator) c.getSystemService(c.VIBRATOR_SERVICE);
                     v.vibrate(pattern, -1);
-                } else if (MainActivity.selection.equals("Battery level") && calcChargePercent(voltage_) < Integer.parseInt(MainActivity.preferenceValue)) {
+                } else if (MainActivity.selection.equals("Battery level") && calcChargePercent(voltage_) <= Integer.parseInt(MainActivity.preferenceValue)) {
                     Vibrator v = (Vibrator) c.getSystemService(c.VIBRATOR_SERVICE);
                     v.vibrate(pattern, -1);
-                } else if (MainActivity.selection.equals("Temperature") && intTemp > Integer.parseInt(MainActivity.preferenceValue)) {
+                } else if (MainActivity.selection.equals("Temperature") && intTemp >= Integer.parseInt(MainActivity.preferenceValue)) {
                     Vibrator v = (Vibrator) c.getSystemService(c.VIBRATOR_SERVICE);
                     v.vibrate(pattern, -1);
                 }

@@ -16,24 +16,13 @@ To make the calibration, please execute the following steps:\n
 - Turn on the power button (if everything went correctly the unicycle will beep)\n
 - Turn off the power button\n
 </string>
+    <string name="alertHelp">You can choose and configure one of the three parameters to get an alert (while the app is running). The alert will make your smartphone vibrate.
+    </string>
+
     <string-array name="arrayAlert">
         <item>Velocity</item>
         <item>Battery level</item>
         <item>Temperature</item>
-    </string-array>
-    <string-array name="arrayVelocity">
-        <item>5Km/h</item>
-        <item>10Km/h</item>
-        <item>15Km/k</item>
-        <item>20Km/h</item>
-        <item>25Km/h</item>
-    </string-array>
-    <string-array name="arrayBattery">
-        <item>5%</item>
-        <item>10%</item>
-        <item>20%</item>
-        <item>30%</item>
-        <item>40%</item>
     </string-array>
 
 
