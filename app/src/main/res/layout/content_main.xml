@@ -18,7 +18,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:padding="2dp"
-        android:visibility="visible">
+        android:visibility="invisible">
         <RelativeLayout
             android:id = "@+id/connectedWith"
             android:layout_width="wrap_content"
@@ -99,7 +99,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:padding="2dp"
-        android:visibility="visible">
+        android:visibility="invisible">
 
         <ProgressBar
             android:layout_alignParentRight="true"
@@ -635,7 +635,7 @@
     </RelativeLayout>
 
     <RelativeLayout
-        android:id = "@+id/calibration"
+        android:id = "@+id/settings"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:padding="2dp"
@@ -668,6 +668,7 @@
                 android:minWidth="0dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:backgroundTint="@color/colorIcon"
                 android:padding="0dp"
 
                 android:text="Soft" />
@@ -676,6 +677,7 @@
                 android:layout_below="@id/soft"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:backgroundTint="@color/colorIcon"
                 android:padding="0dp"
                 android:text="Comfort" />
             <Button
@@ -683,6 +685,7 @@
                 android:layout_below="@id/comfort"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:backgroundTint="@color/colorIcon"
                 android:padding="0dp"
                 android:text="Madden" />
           </RelativeLayout>
@@ -692,6 +695,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/modeLayout"
+            android:paddingBottom="30dp"
             android:visibility="visible">
             <ImageButton
                 android:id="@+id/detailsAlignment"
@@ -716,9 +720,101 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/alignment"
+                android:backgroundTint="@color/colorIcon"
                 android:padding="0dp"
                 android:text="Calibration" />
-
         </RelativeLayout>
+        <RelativeLayout
+            android:id = "@+id/alertLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/alignmentLayout"
+            android:visibility="visible">
+            <ImageButton
+                android:id="@+id/detailsAlert"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_question"
+                android:background="@color/colorBackground"
+                android:padding="0dp"
+                android:layout_alignParentRight="true"/>
+            <TextView
+                android:id="@+id/alerts"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingBottom="8dp"
+                android:text="Alerts my when"
+                android:textSize="20dp"
+                android:textColor="@color/colorText"/>
+            <LinearLayout
+                android:id="@+id/layoutspinner1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/alerts"
+                android:orientation="horizontal"
+                android:background="@drawable/rounded_edge">
+                <Spinner
+                    android:id="@+id/spinner1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingBottom="8dp"
+                    android:paddingTop="8dp"
+                    android:entries="@array/arrayAlert">
+                </Spinner>
+            </LinearLayout>
+            <TextView
+                android:id="@+id/isEqualTo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingBottom="8dp"
+                android:paddingTop="8dp"
+                android:text="Is up to:"
+                android:textSize="20dp"
+                android:textColor="@color/colorText"
+                android:layout_below="@id/layoutspinner1"/>
+            <TextView
+                android:id="@+id/valueAux"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingBottom="8dp"
+                android:paddingTop="8dp"
+                android:paddingLeft="10dp"
+                android:text="km/h"
+                android:textSize="20dp"
+                android:textColor="@color/colorText"
+                android:layout_below="@id/layoutspinner1"
+                android:layout_alignParentRight="true"/>
+            <TextView
+                android:id="@+id/value"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingBottom="8dp"
+                android:paddingTop="8dp"
+                android:text="28"
+                android:textSize="20dp"
+                android:textColor="@color/colorText"
+                android:layout_below="@id/layoutspinner1"
+                android:layout_toLeftOf="@id/valueAux"/>
+            <SeekBar
+                android:id="@+id/seekBar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/isEqualTo"
+                android:padding="0dp"
+                android:max = "40"
+                android:progress="30"
+                android:background="@drawable/rounded_edge"
+                android:progressTint="@color/colorBackground"
+                android:thumbTint="@color/colorLink">
+
+            </SeekBar>
+
+
+            </RelativeLayout>
+
+
+
     </RelativeLayout>
+
+
 </RelativeLayout>

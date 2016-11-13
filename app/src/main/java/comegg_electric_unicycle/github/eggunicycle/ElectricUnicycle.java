@@ -5,9 +5,10 @@
 package comegg_electric_unicycle.github.eggunicycle;
 
 import android.app.Activity;
+import android.content.Context;
 import android.view.View;
 import android.widget.TextView;
-
+import android.os.Vibrator;
 import java.util.Vector;
 
 public class ElectricUnicycle {
@@ -64,7 +65,7 @@ public class ElectricUnicycle {
         SendCommand('y');
     }
 
-    public static void processData(Vector<Byte> dataVector) {
+    public static void processData(Vector<Byte> dataVector, Context c) {
         speedView=  (TextView) myMainActivity.findViewById(R.id.showSpeed);
         voltageView = (TextView) myMainActivity.findViewById(R.id.showVoltage);
         tripView = (TextView) myMainActivity.findViewById(R.id.showTrip);
@@ -265,6 +266,23 @@ public class ElectricUnicycle {
                     state = 0;
                     break;
             }
+            int intSpeed = (int)speed_;
+            int intTemp = (int)temperature_;
+            if (MainActivity.preferenceValue!= null && MainActivity.selection!= null) {
+                long[] pattern = {0, 100, 100, 200};
+                if (MainActivity.selection.equals("Velocity") && intSpeed > Integer.parseInt(MainActivity.preferenceValue)) {
+                    Vibrator v = (Vibrator) c.getSystemService(c.VIBRATOR_SERVICE);
+                    v.vibrate(pattern, -1);
+                } else if (MainActivity.selection.equals("Battery level") && calcChargePercent(voltage_) < Integer.parseInt(MainActivity.preferenceValue)) {
+                    Vibrator v = (Vibrator) c.getSystemService(c.VIBRATOR_SERVICE);
+                    v.vibrate(pattern, -1);
+                } else if (MainActivity.selection.equals("Temperature") && intTemp > Integer.parseInt(MainActivity.preferenceValue)) {
+                    Vibrator v = (Vibrator) c.getSystemService(c.VIBRATOR_SERVICE);
+                    v.vibrate(pattern, -1);
+                }
+
+            }
+
         }
 
     }

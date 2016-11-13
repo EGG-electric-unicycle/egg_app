@@ -5,7 +5,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.os.Build;
@@ -22,13 +21,14 @@ import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
+import android.widget.SeekBar;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ArrayAdapter;
@@ -48,15 +48,24 @@ public class MainActivity extends AppCompatActivity
     private static final int CONNECT = 1;
     public static BluetoothDevice device;
     private Thread connectionThread;
-    String addressInMemory;
+    private String addressInMemory;
     //UI
     ArrayList<String> arrayList;
     ArrayAdapter<String> adapter;
     private ListView list;
+    private Spinner alert;
+    private TextView alertValue;
+    private SeekBar seekBarValue;
+    private SharedPreferences memoryDevice;
+    private SharedPreferences.Editor editor;
+    private boolean firstInit= true;
+    public static String selection;
+    public static String preferenceValue;
+
     public static TextView  devicesEnable;
     public static TextView text22;
     public static ImageView connectState;
-    public static RelativeLayout main, advanced, bluetooth, about, calibration;
+    public static RelativeLayout main, advanced, bluetooth, about, settings ;
 
     public static boolean stopThread;
     int count;
@@ -80,11 +89,19 @@ public class MainActivity extends AppCompatActivity
         bluetooth = (RelativeLayout) findViewById(R.id.bluetooth);
         about = (RelativeLayout) findViewById(R.id.about);
         advanced = (RelativeLayout) findViewById(R.id.advanced);
-        calibration=(RelativeLayout) findViewById(R.id.calibration);
+        settings=(RelativeLayout) findViewById(R.id.settings);
         devicesEnable=(TextView) findViewById(R.id.devicesEnable);
 
+        memoryDevice = getSharedPreferences("MyPrefsDevice", 0);
+        editor= memoryDevice.edit();
+        alert = (Spinner) findViewById(R.id.spinner1);
+        alertValue=(TextView) findViewById(R.id.value);
+        seekBarValue = (SeekBar) findViewById(R.id.seekBar);
         list = (ListView) findViewById(R.id.listDevices1);
         connectState=(ImageView) findViewById(R.id.connectState);
+
+        final TextView textAuxValue = (TextView) findViewById(R.id.valueAux);
+        final TextView textUpDown = (TextView) findViewById(R.id.isEqualTo);
 
         final AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
 
@@ -100,6 +117,8 @@ public class MainActivity extends AppCompatActivity
 
         navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+
 
         //listener to show item click in list of enable devices found
         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -126,6 +145,97 @@ public class MainActivity extends AppCompatActivity
 
                 device= Bluetooth.getDevice(address);
                 connectToDevice();
+
+            }
+        });
+
+        alert.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+
+            @Override
+            public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
+
+                if (firstInit) {
+                    //read values saved in SharedPreferences
+                    selection = memoryDevice.getString("parameter", null);
+                    preferenceValue = memoryDevice.getString("parameterValue", null);
+
+                    if (selection != null && preferenceValue != null) {
+                        alert.setSelection(getIndex(alert , selection));
+                        seekBarValue.setProgress(Integer.parseInt(preferenceValue));
+
+                    }
+                    else
+                        selection = alert.getSelectedItem().toString();   //default value
+
+                    firstInit=false;
+                }
+                else {
+                    selection = alert.getSelectedItem().toString();   //selected value by user
+                }
+                if (selection.equals("Velocity")) {
+                    seekBarValue.setMax(40);
+                    textAuxValue.setText("km/h");
+                    textUpDown.setText("Is up to");
+                } else if (selection.equals("Battery level")) {
+                    seekBarValue.setMax(100);
+                    textAuxValue.setText("%");
+                    textUpDown.setText("Is down to");
+                } else if (selection.equals("Temperature")) {
+                    seekBarValue.setMax(65);
+                    textAuxValue.setText("ºC");
+                    textUpDown.setText("Is up to");
+                }
+                    //Preferences are saved in SharedPreferences
+                editor.putString("parameter", selection);
+                editor.commit();
+
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parentView) {
+
+            }
+            //private method of your class
+            private int getIndex(Spinner spinner, String myString)
+            {
+                int index = 0;
+
+                for (int i=0;i<spinner.getCount();i++){
+                    if (spinner.getItemAtPosition(i).toString().equalsIgnoreCase(myString)){
+                        index = i;
+                        break;
+                    }
+                }
+                return index;
+            }
+
+        });
+
+
+        seekBarValue.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                // TODO Auto-generated method stub
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                // TODO Auto-generated method stub
+            }
+
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress,boolean fromUser) {
+                if (selection.equals("Battery level")) {
+                    int stepSize = 10;
+                    progress = ((int)Math.round(progress/stepSize))*stepSize;
+                    seekBar.setProgress(progress);
+                }
+                alertValue.setText(String.valueOf(progress));
+                preferenceValue = String.valueOf(progress);
+                //Preferences are saved in SharedPreferences
+                editor.putString("parameterValue", String.valueOf(progress));
+                editor.commit();
+
 
             }
         });
@@ -321,7 +431,7 @@ public class MainActivity extends AppCompatActivity
     protected void onStart(){
 
         //check if in memory exist some valid address saved in the past
-        SharedPreferences memoryDevice  = getSharedPreferences("MyPrefsDevice", 0);
+       // SharedPreferences memoryDevice  = getSharedPreferences("MyPrefsDevice", 0);
         addressInMemory = memoryDevice.getString("deviceAdress", null);
         if (!(addressInMemory == null)) {
 
@@ -474,7 +584,7 @@ public class MainActivity extends AppCompatActivity
             bluetooth.setVisibility(View.INVISIBLE);
             about.setVisibility(View.INVISIBLE);
             advanced.setVisibility(View.INVISIBLE);
-            calibration.setVisibility(View.INVISIBLE);
+            settings.setVisibility(View.INVISIBLE);
             getSupportActionBar().setTitle("Home");
             findViewById(R.id.pbHeaderProgressConnect).setVisibility(View.INVISIBLE);
             connectState.setVisibility(View.VISIBLE);
@@ -491,7 +601,7 @@ public class MainActivity extends AppCompatActivity
             bluetooth.setVisibility(View.INVISIBLE);
             about.setVisibility(View.INVISIBLE);
             advanced.setVisibility(View.VISIBLE);
-            calibration.setVisibility(View.INVISIBLE);
+            settings.setVisibility(View.INVISIBLE);
             getSupportActionBar().setTitle("Advanced");
 
         }
@@ -501,19 +611,19 @@ public class MainActivity extends AppCompatActivity
             bluetooth.setVisibility(View.VISIBLE);
             about.setVisibility(View.INVISIBLE);
             advanced.setVisibility(View.INVISIBLE);
-            calibration.setVisibility(View.INVISIBLE);
+            settings.setVisibility(View.INVISIBLE);
             getSupportActionBar().setTitle("Connect Unicycle");
             showEnableDevices();
         }
 
 
-        if (id == R.id.ic_menu_calibration){
+        if (id == R.id.ic_menu_settings){
             main.setVisibility(View.INVISIBLE);
             bluetooth.setVisibility(View.INVISIBLE);
             about.setVisibility(View.INVISIBLE);
             advanced.setVisibility(View.INVISIBLE);
-            calibration.setVisibility(View.VISIBLE);
-            getSupportActionBar().setTitle("Calibration");
+            settings.setVisibility(View.VISIBLE);
+            getSupportActionBar().setTitle("Settings");
 
         }
 
@@ -522,11 +632,10 @@ public class MainActivity extends AppCompatActivity
             bluetooth.setVisibility(View.INVISIBLE);
             about.setVisibility(View.VISIBLE);
             advanced.setVisibility(View.INVISIBLE);
-            calibration.setVisibility(View.INVISIBLE);
+            settings.setVisibility(View.INVISIBLE);
             getSupportActionBar().setTitle("About");
 
         }
-
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);

@@ -9,19 +9,20 @@
         <item
             android:id="@+id/ic_menu_advanced"
             android:icon="@drawable/ic_menu_advanced"
-            android:title="Advanced" />
+            android:title="Advanced View" />
         <item
             android:id="@+id/ic_menu_bluetooth"
             android:icon="@drawable/ic_menu_bluetooth"
             android:title="Connect Unicycle" />
         <item
-            android:id="@+id/ic_menu_calibration"
-            android:icon="@drawable/ic_menu_calibration"
-            android:title="Calibration" />
+            android:id="@+id/ic_menu_settings"
+            android:icon="@drawable/ic_menu_settings"
+            android:title="Settings" />
         <item
             android:id="@+id/ic_menu_about"
             android:icon="@drawable/ic_menu_about"
             android:title="About" />
+
 
     </group>
 
