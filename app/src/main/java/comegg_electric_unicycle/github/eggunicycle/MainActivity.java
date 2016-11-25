@@ -456,11 +456,9 @@ public class MainActivity extends AppCompatActivity
         });
 
 
-    }
-    protected void onStart(){
 
         //check if in memory exist some valid address saved in the past
-       // SharedPreferences memoryDevice  = getSharedPreferences("MyPrefsDevice", 0);
+        // SharedPreferences memoryDevice  = getSharedPreferences("MyPrefsDevice", 0);
         addressInMemory = memoryDevice.getString("deviceAdress", null);
         if (!(addressInMemory == null)) {
 
@@ -483,8 +481,17 @@ public class MainActivity extends AppCompatActivity
             onNavigationItemSelected(navigationView.getMenu().getItem(2));
         }
 
-        super.onStart();
 
+    }
+    protected void onStart(){
+        super.onStart();
+    }
+    protected void onResume(){
+     super.onResume();
+    }
+
+    protected void onPause(){
+        super.onPause();
     }
 
     protected void onDestroy() {

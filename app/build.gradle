@@ -8,8 +8,8 @@ android {
         applicationId "comegg_electric_unicycle.github.eggunicycle"
         minSdkVersion 11
         targetSdkVersion 24
-        versionCode 5
-        versionName "0.7.0"
+        versionCode 6
+        versionName "1.0.0"
     }
     buildTypes {
         release {
