@@ -647,7 +647,7 @@
             android:paddingBottom="30dp"
             android:visibility="visible">
             <ImageButton
-                android:id="@+id/detailsMode"
+                android:id="@+id/ride_mode_help"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@drawable/ic_question"
@@ -698,7 +698,7 @@
             android:paddingBottom="30dp"
             android:visibility="visible">
             <ImageButton
-                android:id="@+id/detailsAlignment"
+                android:id="@+id/upright_calibration_help"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@drawable/ic_question"
@@ -731,7 +731,7 @@
             android:layout_below="@id/alignmentLayout"
             android:visibility="visible">
             <ImageButton
-                android:id="@+id/detailsAlert"
+                android:id="@+id/alerts_help"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@drawable/ic_question"

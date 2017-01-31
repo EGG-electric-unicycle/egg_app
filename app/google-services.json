@@ -1,0 +1,38 @@
+{
+  "project_info": {
+    "project_number": "381116478806",
+    "project_id": "egg-unicycle"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:381116478806:android:fc2bc222b895d764",
+        "android_client_info": {
+          "package_name": "comegg_electric_unicycle.github.eggunicycle"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD8x4h2geP8aIOKBuIlrTjByzjDGEnfTYU"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 2,
+          "analytics_property": {
+            "tracking_id": "UA-91167245-1"
+          }
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 1
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

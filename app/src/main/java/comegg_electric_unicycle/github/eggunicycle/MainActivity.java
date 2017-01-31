@@ -1,6 +1,5 @@
 package comegg_electric_unicycle.github.eggunicycle;
 
-
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.IntentFilter;
@@ -32,18 +31,17 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ArrayAdapter;
-
 import android.content.Intent;
 import android.bluetooth.BluetoothDevice;
-
-import java.io.IOException;
-
+import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.analytics.Tracker;
 import java.util.ArrayList;
 import java.lang.String;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
+    private Tracker mTracker;
     private static final int NOCONNECT = 0;
     private static final int CONNECT = 1;
     public static BluetoothDevice device;
@@ -80,9 +78,19 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        // [START shared_tracker]
+        // Obtain the shared Tracker instance.
+        AnalyticsApplication application = (AnalyticsApplication) getApplication();
+        mTracker = application.getDefaultTracker();
+        // [END shared_tracker]
+
+        mTracker.send(new HitBuilders.EventBuilder()
+                .setCategory("Action")
+                .setAction("activity_main")
+                .build());
 
         //UI
         main= (RelativeLayout) findViewById(R.id.home);
@@ -117,7 +125,6 @@ public class MainActivity extends AppCompatActivity
 
         navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-
 
 
         //listener to show item click in list of enable devices found
@@ -369,7 +376,7 @@ public class MainActivity extends AppCompatActivity
 
 
         //the action code for help button in settings
-        final ImageButton buttonHelpMode = (ImageButton) findViewById(R.id.detailsMode);
+        final ImageButton buttonHelpMode = (ImageButton) findViewById(R.id.ride_mode_help);
         buttonHelpMode.setOnTouchListener(new View.OnTouchListener() {
 
             public boolean onTouch(View v, MotionEvent event) {
@@ -398,7 +405,7 @@ public class MainActivity extends AppCompatActivity
         });
 
         //the action code for help button in settings
-        final ImageButton buttonHelpAlignment = (ImageButton) findViewById(R.id.detailsAlignment);
+        final ImageButton buttonHelpAlignment = (ImageButton) findViewById(R.id.upright_calibration_help);
         buttonHelpAlignment.setOnTouchListener(new View.OnTouchListener() {
 
             public boolean onTouch(View v, MotionEvent event) {
@@ -427,7 +434,7 @@ public class MainActivity extends AppCompatActivity
         });
 
         //the action code for help button in settings
-        final ImageButton buttonHelpAlert = (ImageButton) findViewById(R.id.detailsAlert);
+        final ImageButton buttonHelpAlert = (ImageButton) findViewById(R.id.alerts_help);
         buttonHelpAlert.setOnTouchListener(new View.OnTouchListener() {
 
             public boolean onTouch(View v, MotionEvent event) {
@@ -454,7 +461,6 @@ public class MainActivity extends AppCompatActivity
                SendEUCCommand.beep();
             }*/
         });
-
 
 
         //check if in memory exist some valid address saved in the past
@@ -504,6 +510,7 @@ public class MainActivity extends AppCompatActivity
         list.setAdapter(null);
         super.onDestroy();
     }
+
     public void showEnableDevices()
     {
         //set adapter to show all devices in the listView
@@ -522,67 +529,57 @@ public class MainActivity extends AppCompatActivity
             findViewById(R.id.connectedWith).setVisibility(View.GONE);
         }
 
-
         Bluetooth.checkDevice();
         Bluetooth.startResearch();
 
         IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
         registerReceiver(mReceiver, filter);
-
     }
 
-
-
     private void connectToDevice(){
-
         this.runOnUiThread(new Runnable() {
             public void run() {
                 connectState.setVisibility(View.INVISIBLE);
                 findViewById(R.id.pbHeaderProgressConnect).setVisibility(View.VISIBLE);
             }
         });
-       this.connectionThread = new Thread() {
-           @Override
-           public void run() {
-               while(!Thread.currentThread().isInterrupted()) {
-                   count++;
 
+        this.connectionThread = new Thread() {
+            @Override
+            public void run() {
+                while(!Thread.currentThread().isInterrupted()) {
+                    count++;
+                    Bluetooth.connectSocket();
+                    if (Bluetooth.isConnected) {
+                        runOnUiThread(new Runnable() {
+                        public void run() {
+                            connectState.setVisibility(View.VISIBLE);
+                            findViewById(R.id.pbHeaderProgressConnect).setVisibility(View.INVISIBLE);
+                            connectState.setImageResource(R.drawable.ic_connect);
+                        }
+                        });
 
-                   Bluetooth.connectSocket();
+                        IntentFilter filter2 = new IntentFilter(BluetoothDevice.ACTION_ACL_DISCONNECTED);
+                        registerReceiver(mReceiver, filter2);
+                        connectionThread.interrupt();
 
-                   if (Bluetooth.isConnected) {
-                       runOnUiThread(new Runnable() {
-                           public void run() {
-                               connectState.setVisibility(View.VISIBLE);
-                               findViewById(R.id.pbHeaderProgressConnect).setVisibility(View.INVISIBLE);
-                               connectState.setImageResource(R.drawable.ic_connect);
-                           }
-                       });
+                        // finished thread
+                        Message msg = Message.obtain();
+                        msg.what = CONNECT;
+                        handler.sendMessage(msg);
 
+                        } else {
+                        // finished thread
 
-                       IntentFilter filter2 = new IntentFilter(BluetoothDevice.ACTION_ACL_DISCONNECTED);
-                       registerReceiver(mReceiver, filter2);
-                       connectionThread.interrupt();
-
-                       // finished thread
-                       Message msg = Message.obtain();
-                       msg.what = CONNECT;
-                       handler.sendMessage(msg);
-
-
-                   } else {
-                       // finished thread
-
-                       Message msg = Message.obtain();
-                       msg.what = NOCONNECT;
-                       handler.sendMessage(msg);
-                   }
-               }
-           }
+                        Message msg = Message.obtain();
+                        msg.what = NOCONNECT;
+                        handler.sendMessage(msg);
+                    }
+                }
+            }
        };
 
        connectionThread.start();
-
     }
 
     private Handler handler = new Handler() {
@@ -590,7 +587,6 @@ public class MainActivity extends AppCompatActivity
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case CONNECT:
-
                     //countView.setVisibility(View.INVISIBLE);
                     //connection to device with sucess. Address of device is saved in SharedPreferences
                     SharedPreferences memoryDevice = getSharedPreferences("MyPrefsDevice", 0);
@@ -631,8 +627,12 @@ public class MainActivity extends AppCompatActivity
                 connectState.setImageResource(R.drawable.ic_disconnect);
             }
 
-        }
-        if (id == R.id.ic_menu_advanced){
+            mTracker.send(new HitBuilders.EventBuilder()
+                    .setCategory("Action")
+                    .setAction("menu_home")
+                    .build());
+
+        } else if (id == R.id.ic_menu_advanced){
             main.setVisibility(View.INVISIBLE);
             bluetooth.setVisibility(View.INVISIBLE);
             about.setVisibility(View.INVISIBLE);
@@ -640,9 +640,12 @@ public class MainActivity extends AppCompatActivity
             settings.setVisibility(View.INVISIBLE);
             getSupportActionBar().setTitle("Advanced");
 
-        }
+            mTracker.send(new HitBuilders.EventBuilder()
+                    .setCategory("Action")
+                    .setAction("menu_advanced")
+                    .build());
 
-        if (id == R.id.ic_menu_bluetooth){
+        } else if (id == R.id.ic_menu_bluetooth){
             main.setVisibility(View.INVISIBLE);
             bluetooth.setVisibility(View.VISIBLE);
             about.setVisibility(View.INVISIBLE);
@@ -650,10 +653,13 @@ public class MainActivity extends AppCompatActivity
             settings.setVisibility(View.INVISIBLE);
             getSupportActionBar().setTitle("Connect Unicycle");
             showEnableDevices();
-        }
 
+            mTracker.send(new HitBuilders.EventBuilder()
+                    .setCategory("Action")
+                    .setAction("menu_connect_unicycle")
+                    .build());
 
-        if (id == R.id.ic_menu_settings){
+        } else if (id == R.id.ic_menu_settings){
             main.setVisibility(View.INVISIBLE);
             bluetooth.setVisibility(View.INVISIBLE);
             about.setVisibility(View.INVISIBLE);
@@ -661,9 +667,12 @@ public class MainActivity extends AppCompatActivity
             settings.setVisibility(View.VISIBLE);
             getSupportActionBar().setTitle("Settings");
 
-        }
+            mTracker.send(new HitBuilders.EventBuilder()
+                    .setCategory("Action")
+                    .setAction("menu_settings")
+                    .build());
 
-        if (id == R.id.ic_menu_about){
+        } else if (id == R.id.ic_menu_about){
             main.setVisibility(View.INVISIBLE);
             bluetooth.setVisibility(View.INVISIBLE);
             about.setVisibility(View.VISIBLE);
@@ -671,6 +680,10 @@ public class MainActivity extends AppCompatActivity
             settings.setVisibility(View.INVISIBLE);
             getSupportActionBar().setTitle("About");
 
+            mTracker.send(new HitBuilders.EventBuilder()
+                    .setCategory("Action")
+                    .setAction("menu_about")
+                    .build());
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -687,8 +700,6 @@ public class MainActivity extends AppCompatActivity
         Bluetooth.readData();
     }
 
-
-
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
@@ -698,25 +709,19 @@ public class MainActivity extends AppCompatActivity
                         .getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                 arrayList.add(deviceFound.getName() + "\n" + deviceFound.getAddress());
                 adapter.notifyDataSetChanged();
-
             }
+
             if (BluetoothDevice.ACTION_ACL_DISCONNECTED.equals(action)){
                 connectionThread.interrupt();
-
                 connectionThread = null;
-
                 Bluetooth.checkDevice();
                // device= Bluetooth.getDevice(addressInMemory);
                 connectToDevice();
             }
 
-
             if (arrayList.isEmpty()) {
                 Toast.makeText(getBaseContext(), "No devices found", Toast.LENGTH_LONG).show();
             }
-
         }
-
     };
-
 }
