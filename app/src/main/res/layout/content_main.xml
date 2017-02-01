@@ -743,7 +743,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:paddingBottom="8dp"
-                android:text="Alerts my when"
+                android:text="Alert me when"
                 android:textSize="20dp"
                 android:textColor="@color/colorText"/>
             <LinearLayout
